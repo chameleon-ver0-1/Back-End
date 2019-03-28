@@ -3,7 +3,7 @@ var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEv
 //Add grammar
 var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList
 
-var keywords = ['고양이', '강아지', '전미경', '조영서'];
+var keywords = ['권소영', '안지후', '조윤영', '한예지'];
 var grammar = '#JSGF V1.0; grammar keywords; public <keyword> = ' + keywords.join(' | ') + ' ;'
 
 var recognition = new SpeechRecognition();
