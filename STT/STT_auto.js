@@ -15,6 +15,7 @@ const language = 'ko-KR';
 
 // $ -> jquery 변수로 선언, jquery 라이브러리의 내장함수 사용
 const $btnJoin = $('#btnJoin');
+const $btnExit = $('#btnExit');
 const $result = $('#result');
 
 recognition.continuous = true; // 음성이 인식될 때마다 결과값 반환
@@ -74,13 +75,14 @@ recognition.onresult = function(event) {
         }
     }
 
+    /*Front 화면에 글자 표시*/
     //finalTranscript = capitalize(finalTranscript); // 최종본 첫 글자 대문자화(EN)
-    //final_span.innerHTML = linebreak(finalTranscript); // 최종본 개행 처리
-    //interim_span.innerHTML = linebreak(interimTranscript); // 중간값 개행 처리
+    final_span.innerHTML = finalTranscript; // 최종본 개행 처리 linebreak(finalTranscript)
+    interim_span.innerHTML = interimTranscript; // 중간값 개행 처리 linebreak(interimTranscript)
 
     console.log('finalTranscript', finalTranscript);
     console.log('interimTranscript', interimTranscript);
-    fireCommand(interimTranscript); // GridViewInstance ~
+    // fireCommand(interimTranscript); // undefined Funcion
 };
 
 
@@ -126,9 +128,9 @@ function capitalize(s) {
 
 /*음성 인식 트리거
     @param event*/
-function start(event) {
+function join(event) {
     if (isRecognizing) {
-        recognition.stop();
+        alert('이미 참여 중입니다.');
         return;
     }
 
@@ -141,39 +143,18 @@ function start(event) {
     // interim_span.innerHTML = '';
 }
 
-
-/**
- * 미사용
- * requestServer
- * key - AIzaSyDiMqfg8frtoZflA_2LPqfGdpjmgTMgWhg
- */
-/*
-function requestServer() {
-    $.ajax({
-        method: 'post',
-        url: 'https://www.google.com/speech-api/v2/recognize?output=json&lang=en-us&key=AIzaSyDiMqfg8frtoZflA_2LPqfGdpjmgTMgWhg',
-        data: '/examples/speech-recognition/hello.wav',
-        contentType: 'audio/l16; rate=16000;', // 'audio/x-flac; rate=44100;',
-        success: function(data) {
-
-        },
-        error: function(xhr) {
-
-        }
-    });
+function exit(event) {
+    if (isRecognizing) {
+        recognition.stop();
+        return;
+    }
 }
-*/
 
 
 /*초기 바인딩*/
 function initialize() {
-    $btnJoin.click(start); // 버튼 클릭 시 트리거 수행
-    /*
-    $('#btn-tts').click(function() {
-        const text = $('#final_span').text() || '전 음성 인식된 글자를 읽습니다.';
-        textToSpeech(text);
-    });
-    */
+    $btnJoin.click(join);
+    $btnExit.click(exit);
 }
 
 initialize();

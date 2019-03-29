@@ -3,8 +3,7 @@
 /*회의실 생성 변수*/
 let onAir = false; // 회의가 진행 중인지
 const mediaStreamConstraints = { // 사용할 Media 요소들
-    video: true,
-    audio: true
+    video: true
 };
 const localVideo = document.querySelector('video');
 let localStream;
@@ -28,6 +27,9 @@ var btnJoin = document.getElementById('btnJoin');
 btnJoin.addEventListener('click', onBtnJoin);
 
 function onBtnJoin() {
+    if (onAir) {
+        return;
+    }
 
     // 미디어 자원을 얻어온다.
     navigator.mediaDevices.getUserMedia(mediaStreamConstraints).then(gotLocalMediaStream).catch(handleLocalMediaStreamError);
@@ -44,16 +46,18 @@ var btnExit = document.getElementById('btnExit');
 btnExit.addEventListener('click', onBtnExit);
 
 function onBtnExit() {
+    if (onAir) {
 
-    // 미디어 자원을 해제한다.
-    localStream = null;
-    localVideo.srcObject = null;
+        // 미디어 자원을 해제한다.
+        localStream = null;
+        localVideo.srcObject = null;
 
-    alert("Done");
+        alert("Done");
 
-    // 회의 종료 상태로 변경
-    onAir = false;
+        // 회의 종료 상태로 변경
+        onAir = false;
 
-    console.log("onBtnExit()");
-    console.log("onAir: " + onAir);
+        console.log("onBtnExit()");
+        console.log("onAir: " + onAir);
+    }
 };
