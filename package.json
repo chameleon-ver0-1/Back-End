@@ -47,7 +47,9 @@
     "muaz",
     "muaz-khan"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "jquery": "^3.3.1"
+  },
   "analyze": false,
   "license": "MIT",
   "readmeFilename": "README.md",
