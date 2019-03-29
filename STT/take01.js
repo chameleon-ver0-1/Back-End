@@ -1,16 +1,32 @@
 'use strict';
 
-// 회의가 진행 중이면 1, 아니면 0을 가지는 변수
-let onAir = false;
+/*회의실 생성 변수*/
+let onAir = false; // 회의가 진행 중인지
+const mediaStreamConstraints = { // 사용할 Media 요소들
+    video: true,
+    audio: true
+};
+const localVideo = document.querySelector('video');
+let localStream;
 
-// 음성인식 관련
-const recognition = new webkitSpeechRecognition();
+/*회의실 생성 함수*/
+function gotLocalMediaStream(mediaStream) { // 얻어온 Media 요소를 할당하는 함수
+    localStream = mediaStream;
+    localVideo.srcObject = mediaStream;
+}
+
+function handleLocalMediaStreamError(error) { // Media 얻어오기 실패 시 에러 처리
+    console.log('navigator.getUserMedia error: ', error);
+}
+
+/*음성인식 관련*/
+let SpeechRecognition = SpeechRecognition || webkitSpeechRecognition // web Recognition API
 const language = 'ko-KR';
-const two_line = /\n\n/g;
-const one_line = /\n/g;
-const first_char = /\S/;
+//const two_line = /\n\n/g;
+//const one_line = /\n/g;
+//const first_char = /\S/;
 
-const $btnMic = $('#btn-mic');
+const $btnMic = $('#btn-mic'); // $변수 -> jquery 변수로 선언, 내장함수 사용
 const $result = $('#result');
 
 // 계속 음성인식 & 중간결과를 리턴하도록 option set
@@ -18,23 +34,8 @@ recognition.continuous = true;
 recognition.interimResults = true;
 
 // 미디어 접근 관련
-const mediaStreamConstraints = {
-    video: true,
-    audio: true
-};
 
-const localVideo = document.querySelector('video');
 
-let localStream;
-
-function gotLocalMediaStream(mediaStream) {
-    localStream = mediaStream;
-    localVideo.srcObject = mediaStream;
-}
-
-function handleLocalMediaStreamError(error) {
-    console.log('navigator.getUserMedia error: ', error);
-}
 
 //--------------------------------------------------------
 //-----------------버트으으으은코오오오오드-----------------
