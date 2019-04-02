@@ -11,7 +11,7 @@
 
   <p>
     <video id="video" autoplay playsinline></video>
-    <button onclick="capture()">Capture</button>
+    <button onclick="capture()" >Capture</button>
   </p>
   <canvas id="canvas" style="overflow:auto"></canvas>
 
@@ -26,7 +26,7 @@
       /** Code to merge image **/
       /** For instance, if I want to merge a play image on center of existing image **/
       const playImage = new Image();
-      playImage.src = 'image/';
+      //playImage.src = 'image/';
       playImage.onload = () => {
         const startX = (video.videoWidth / 2) - (playImage.width / 2);
         const startY = (video.videoHeight / 2) - (playImage.height / 2);
@@ -37,7 +37,6 @@
           img.src = window.URL.createObjectUrl(blob);
         };
       };
-      //src="rekognition.js"
       /** End **/
     }
   </script>
