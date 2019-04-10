@@ -8,17 +8,21 @@
 
 <body>
   <h1>Realtime Capture</h1>
-
   <p>
     <video id="video" autoplay playsinline></video>
-    <button onclick="capture()" >Capture</button>
+    <button onclick="capture()">Capture</button>
   </p>
   <canvas id="canvas" style="overflow:auto"></canvas>
 
+  <form method="post" action="/trans_data">
+    <input type="hidden" name="img" id="img"/>
+    <input type="submit" value="전송" />
+  </form>
   <script type="text/javascript">
     function capture() {
       var canvas = document.getElementById('canvas');
       var video = document.getElementById('video');
+      //var file = document.getElementById('file');
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       canvas.getContext('2d').drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
@@ -37,6 +41,10 @@
           img.src = window.URL.createObjectUrl(blob);
         };
       };
+      var imgDetect = document.getElementById('img');
+      imgDetect.value = canvas.toDataURL();
+
+      //const file = new File(trans_img, test.jpg, {type: `image/${extension}`});
       /** End **/
     }
   </script>
