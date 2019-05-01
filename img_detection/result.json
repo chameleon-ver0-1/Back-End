@@ -1,1 +1,22 @@
-[{"Type":"HAPPY","Confidence":1.586093783378601},{"Type":"SURPRISED","Confidence":1.477765440940857},{"Type":"ANGRY","Confidence":0.6529589891433716},{"Type":"SAD","Confidence":1.9704060554504395},{"Type":"DISGUSTED","Confidence":0.3278887867927551},{"Type":"CONFUSED","Confidence":11.66425895690918},{"Type":"CALM","Confidence":82.32062530517578}]
+[{
+  "Type": "HAPPY",
+  "Confidence": 1.586093783378601
+}, {
+  "Type": "SURPRISED",
+  "Confidence": 1.477765440940857
+}, {
+  "Type": "ANGRY",
+  "Confidence": 0.6529589891433716
+}, {
+  "Type": "SAD",
+  "Confidence": 1.9704060554504395
+}, {
+  "Type": "DISGUSTED",
+  "Confidence": 0.3278887867927551
+}, {
+  "Type": "CONFUSED",
+  "Confidence": 11.66425895690918
+}, {
+  "Type": "CALM",
+  "Confidence": 82.32062530517578
+}]
