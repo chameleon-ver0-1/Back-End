@@ -41,15 +41,19 @@ app.post('/trans_data', function(req, res) {
   rekognition.detectFaces(params, function(err, data) {
     if (err) console.log(err, err.stack); // an error occurred
     else {
-      console.log(data); // successful response
+      //예지 : FaceDetails[0] 은 사람한명을 의미 (어차피 각각 얼굴분석하니까 괜찮음)
+      console.log(data.FaceDetails[0].Emotions); // successful response
       try {
-        fs.writeFileSync("./result.json", JSON.stringify(data))
+        //var json = JSON.stringify(data);
+        //var result = JSON.parse(data.FaceDetails);
+        //console.log(data);
+        fs.writeFileSync("./result.json", JSON.stringify(data.FaceDetails[0].Emotions))
       } catch (err) {
         console.error(err)
       }
     }
   });
-  res.send("Success");
+  res.redirect('/');
 });
 
 app.listen(3000, () => {

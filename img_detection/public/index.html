@@ -10,13 +10,14 @@
   <h1>Realtime Capture</h1>
   <p>
     <video id="video" autoplay playsinline></video>
-    <button onclick="capture()">Capture</button>
+    <!-- <button onclick="capture()">Capture</button> -->
   </p>
   <canvas id="canvas" style="overflow:auto"></canvas>
 
   <form method="post" action="/trans_data">
     <input type="hidden" name="img" id="img"/>
-    <input type="submit" value="전송" />
+    <button type="submit" onclick="capture()">전송</button>
+    <!-- <input type="submit" value="전송" /> -->
   </form>
   <script type="text/javascript">
     function capture() {
@@ -44,7 +45,6 @@
       var imgDetect = document.getElementById('img');
       imgDetect.value = canvas.toDataURL();
 
-      //const file = new File(trans_img, test.jpg, {type: `image/${extension}`});
       /** End **/
     }
   </script>
