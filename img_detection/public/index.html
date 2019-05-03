@@ -10,14 +10,14 @@
   <h1>Realtime Capture</h1>
   <p>
     <video id="video" autoplay playsinline></video>
-    <!-- <button onclick="capture()">Capture</button> -->
   </p>
-  <canvas id="canvas" style="overflow:auto"></canvas>
 
-  <form method="post" action="/trans_data">
+  <canvas id="canvas" style="overflow:auto" hidden></canvas>
+
+  <button onclick="var startInterval = setInterval(repeat, 2000);">시작</button>
+  <button onclick="clearInterval(startInterval)">종료</button>
+  <form method="post" action="/trans_data" id="form">
     <input type="hidden" name="img" id="img"/>
-    <button type="submit" onclick="capture()">전송</button>
-    <!-- <input type="submit" value="전송" /> -->
   </form>
   <script type="text/javascript">
     function capture() {
@@ -44,8 +44,12 @@
       };
       var imgDetect = document.getElementById('img');
       imgDetect.value = canvas.toDataURL();
-
-      /** End **/
+    }
+  </script>
+  <script type="text/javascript">
+    function repeat() {
+      capture();
+      document.getElementById("form").submit();
     }
   </script>
   <script src="js/main.js"></script>
