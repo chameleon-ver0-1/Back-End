@@ -14,7 +14,7 @@
 
   <canvas id="canvas" style="overflow:auto" hidden></canvas>
 
-  <button onclick="var startInterval = setInterval(repeat, 2000);">시작</button>
+  <button onclick="startInterval()">시작</button>
   <button onclick="clearInterval(startInterval)">종료</button>
   <form method="post" action="/trans_data" id="form">
     <input type="hidden" name="img" id="img"/>
@@ -47,6 +47,10 @@
     }
   </script>
   <script type="text/javascript">
+    function startInterval(){
+      setInterval(repeat, 2000);
+    }
+
     function repeat() {
       capture();
       document.getElementById("form").submit();
