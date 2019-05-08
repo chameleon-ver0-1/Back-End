@@ -1,58 +1,29 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-  <title>Realtime Capture</title>
-  <link rel="stylesheet" href="css/main.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>VideoCapture</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
-  <h1>Realtime Capture</h1>
-  <p>
-    <video id="video" autoplay playsinline></video>
-  </p>
 
-  <canvas id="canvas" style="overflow:auto" hidden></canvas>
-
-  <button onclick="startInterval()">시작</button>
-  <button onclick="clearInterval(startInterval)">종료</button>
   <form method="post" action="/trans_data" id="form">
-    <input type="hidden" name="img" id="img"/>
+    <input type="hidden" name="img" id="img" />
   </form>
-  <script type="text/javascript">
-    function capture() {
-      var canvas = document.getElementById('canvas');
-      var video = document.getElementById('video');
-      //var file = document.getElementById('file');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      canvas.getContext('2d').drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
 
-      /** Code to merge image **/
-      /** For instance, if I want to merge a play image on center of existing image **/
-      const playImage = new Image();
-      //playImage.src = 'image/';
-      playImage.onload = () => {
-        const startX = (video.videoWidth / 2) - (playImage.width / 2);
-        const startY = (video.videoHeight / 2) - (playImage.height / 2);
+  <div class="top-container">
+    <video id="video"></video>
+    <button id="photo-button" class="btn btn-dark">Take Photo</button>
+    <button id="clear-button" class="btn btn-light">Clear</button>
+    <canvas id="canvas"></canvas>
+  </div>
 
-        canvas.getContext('2d').drawImage(playImage, startX, startY, playImage.width, playImage.videoHeight);
-        canvas.toBlob() = (blob) => {
-          const img = new Image();
-          img.src = window.URL.createObjectUrl(blob);
-        };
-      };
-      var imgDetect = document.getElementById('img');
-      imgDetect.value = canvas.toDataURL();
-    }
-  </script>
-  <script type="text/javascript">
-    function repeat() {
-      capture();
-      document.getElementById("form").submit();
-    }
-  </script>
+  <div class="bottom-container">
+    <div id="photos"></div>
+  </div>
+
   <script src="js/main.js"></script>
 </body>
-
 </html>
