@@ -1,11 +1,13 @@
-var express = require('express')
-var bodyParser = require('body-parser')
-var app = express()
+const express = require('express')
+const bodyParser = require('body-parser')
+const app = express()
 
 const AWS = require('aws-sdk')
 const parameters = require('./parameters')
 const fs = require('fs')
 const sharp = require('sharp')
+
+var count = 0;
 
 app.use(bodyParser.urlencoded({
   limit: '50mb',
@@ -21,6 +23,7 @@ app.get('/', function(req, res) {
 });
 
 app.post('/trans_data', function(req, res) {
+  console.log(count);
   var img = req.body.img;
   var buffer = new Buffer.from(img.replace(/^data:image\/(png|gif|jpeg);base64,/,''), 'base64');
 
@@ -41,19 +44,22 @@ app.post('/trans_data', function(req, res) {
   rekognition.detectFaces(params, function(err, data) {
     if (err) console.log(err, err.stack); // an error occurred
     else {
-      //예지 : FaceDetails[0] 은 사람한명을 의미 (어차피 각각 얼굴분석하니까 괜찮음)
+      //예지 : FaceDetails[0] 은 이미지하나에 사람한명을 의미 (어차피 각각 얼굴분석하니까 괜찮음)
       console.log(data.FaceDetails[0].Emotions); // successful response
       try {
-        //var json = JSON.stringify(data);
-        //var result = JSON.parse(data.FaceDetails);
-        //console.log(data);
-        fs.writeFileSync("./result.json", JSON.stringify(data.FaceDetails[0].Emotions))
+        if(count===0){
+          fs.writeFileSync("./result.json", JSON.stringify(data.FaceDetails[0].Emotions));
+          count++;
+        }
+        else{
+          fs.appendFileSync('./result.json',","+JSON.stringify(data.FaceDetails[0].Emotions));
+        }
       } catch (err) {
         console.error(err)
       }
     }
   });
-  res.redirect('/');
+  res.redirect('/'); //->이게문젠가
 });
 
 app.listen(3000, () => {
