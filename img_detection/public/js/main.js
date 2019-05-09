@@ -11,6 +11,7 @@ const photoButton = document.getElementById('photo-button');
 const clearButton = document.getElementById('clear-button');
 //예지
 const transImg  = document.getElementById('img');
+var playTran;
 
 // Get media stream
 navigator.mediaDevices.getUserMedia({video: true, audio: false})
@@ -50,10 +51,16 @@ navigator.mediaDevices.getUserMedia({video: true, audio: false})
   clearButton.addEventListener('click', function(e) {
     // Clear photos
     photos.innerHTML = '';
+    clearInterval(playTran);
   });
 
   // Take picture from canvas
   function takePicture() {
+    capture();
+    playTran = setInterval(function() {capture();}, 2000);
+  }
+
+  function capture(){
     // Create canvas
     const context = canvas.getContext('2d');
     if(width && height) {
