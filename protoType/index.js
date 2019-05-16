@@ -1,14 +1,28 @@
 'use strict';
 
-var os = require('os');
-var nodeStatic = require('node-static');
-var http = require('http');
-var socketIO = require('socket.io');
+console.log("start node");
+
+const os = require('os');
+const nodeStatic = require('node-static');
+const socketIO = require('socket.io');
+const tls = require('tls');
+const fs = require('fs');
+const https = require('https');
+
+console.log("start set options");
+
+var options = {
+    key: fs.readFileSync('/etc/letsencrypt/live/www.chameleon2019.cf/privkey.pem'),
+    cert: fs.readFileSync('/etc/letsencrypt/live/www.chameleon2019.cf/cert.pem')
+};
 
 var fileServer = new(nodeStatic.Server)();
-var app = http.createServer(function(req, res) {
+
+var app = https.createServer(options, (req, res) => {
+
   fileServer.serve(req, res);
-}).listen(8888);
+
+}).listen(80);
 
 var io = socketIO.listen(app);
 io.sockets.on('connection', function(socket) {
