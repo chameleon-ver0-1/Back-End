@@ -14,7 +14,7 @@ const transImg  = document.getElementById('img');
 var playTran;
 
 // Get media stream
-navigator.mediaDevices.getUserMedia({video: true, audio: false})
+navigator.mediaDevices.getUserMedia({video: true, audio: true})
   .then(function(stream) {
     // Link to the video source
     video.srcObject = stream;
