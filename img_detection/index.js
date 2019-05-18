@@ -59,7 +59,7 @@ app.post('/trans_data', function(req, res) {
       }
     }
   });
-  res.redirect('/'); //->이게문젠가
+  res.redirect('/'); 
 });
 
 app.listen(3000, () => {
