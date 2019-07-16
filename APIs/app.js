@@ -66,63 +66,6 @@ app.post('/users', (req, res) => {  // CREATE USER
     });
 });
 
-app.get('/', (req, res) => {
-    res.send('Hello World!\n');
-});
-
-app.get('/users', (req, res) => res.json(users));
-
-app.get('/users/:id', (req, res) => {
-    const id = parseInt(req.params.id);
-    if (!id) {
-        return res.status(400).json({error: 'Incorrect id'});
-    }
-
-    let user = users.filter(user => user.id === id)[0];
-    if (!user) {
-        return res.status(404).json({error: 'Unknown user'});
-    }
-
-    return res.json(user);
-});
-
-app.delete('/users/:id', (req, res) => {
-    const id = parseInt(req.params.id);
-    if (!id) {
-        return res.status(400).json({error: 'Incorrect id'});
-    }
-
-    const userIndex = users.findIndex(user => {
-        return user.id === id;
-    });
-    if (userIndex === -1) {
-        return res.status(404).json({error: 'Unknown user'});
-    }
-
-    users.splice(userIndex, 1);
-    res.status(204).send();
-});
-
-app.post('/users', (req, res) => {
-    const name = req.body.name || '';
-    if (!name.length) {
-        return res.status(400).json({error : 'Incorrect name'});
-    }
-
-
-    const id = users.reduce((maxId, user) => { // 
-        return user.id > maxId ? user.id : maxId;
-    }, 0) + 1;
-
-    const newUser = {
-        id: id,
-        name: name
-    };
-    users.push(newUser);
-
-    return res.status(201).json(newUser);
-});
-
 /** PORT LISTENING */
 app.listen(3000, () => {
     console.log('Express가 3000번 포트에서 리스닝 중이라네!');
