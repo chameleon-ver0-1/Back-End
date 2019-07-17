@@ -12,29 +12,27 @@ var conn = mysql.createConnection({
   user     : 'root',
   password : '262908',
   port     : 3306,
-  database : 'userInfo'
+  database : 'userInfo',
+  charset  : 'utf8'
 });
 
 conn.connect();
 
 
 
-let users = [
-    {
-        id: 1,
-        name: 'onisley'
-    },
-    {
-        id: 2,
-        name: 'kwon'
-    },
-    {
-        id: 3,
-        name: 'kidel'
-    }
-];
 
-/** API MOTHOD */
+
+/** API METHOD */
+app.get('/users', (req, res) => {
+    const sql = "SELECT * FROM user_info";
+    conn.query(sql, function(err, rows, fields) {
+        if (!err) {
+            return res.json(rows);
+        } else {
+            return res.status(400).json(rows);
+        }
+    });
+});
 app.post('/users', (req, res) => {  // CREATE USER
     const email = req.body.email || '';
     const passwd = req.body.passwd || '';
