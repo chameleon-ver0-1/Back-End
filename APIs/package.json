@@ -1,0 +1,15 @@
+{
+  "name": "apis",
+  "version": "1.0.0",
+  "description": "APIs for Chameleon",
+  "main": "index.js",
+  "scripts": {
+    "test": "node app.js"
+  },
+  "author": "Onisley",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "mysql": "^2.17.1"
+  }
+}
