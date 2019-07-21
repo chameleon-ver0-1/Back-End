@@ -8,6 +8,7 @@ app.use(bodyParser.urlencoded({ extended : true }));
 
 /* mySql Connection */
 var mysql = require('mysql');
+// TODO: DB Pool 위치 어디에 유지할건지
 var pool = mysql.createPool({
     host     : process.env.MYSQL_HOST,
     port     : process.env.MYSQL_PORT,
@@ -20,7 +21,10 @@ var pool = mysql.createPool({
     charset  : 'utf8'
 });
 
-conn.connect();
+
+
+
+
 
 // configure api router
 app.use('/api', require('./routes/api'));

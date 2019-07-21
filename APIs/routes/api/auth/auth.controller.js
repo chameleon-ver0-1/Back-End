@@ -6,20 +6,32 @@ var _DBPool = require('../lib/_DBPool');
  */
 exports.duplicateEmail = (req, res) => {
     const email = req.query.email;
-    console.log("email is => " + email);
     const sql = "select * from user_info where email='" + email + "'";
-    conn.query(sql, function(err, rows, fields) {
-        if (err) {
-            console.log('Error while performing Query.', err);
+
+    // TODO: DB Pool 위치 어디에 유지할건지
+    // FIXME: pool is not definded
+    pool.getConnection(function(err, conn){
+        if(!err){
+            console.log('MySql Connection Error!');
         }
 
-        console.log('rows => ', rows);
+        conn.query(sql, function(err, rows, fields) {
+            console.log('sql query executing...');
+            conn.release();
 
-        if (!rows.length)
-            return res.status(200).json({message: "이메일 사용 가능", data : false});
-        else
-            return res.status(400).json({message: "이미 존재하는 메일주소", data : false});
-    });
+            if (err) {
+                console.log('Error while performing Query.', err);
+            }
+    
+            console.log('rows => ', rows);
+    
+            if (!rows.length)
+                return res.status(200).json({message: "이메일 사용 가능", data : false});
+            else
+                return res.status(400).json({message: "이미 존재하는 메일주소", data : false});
+        });
+      });
+
 };
 
 /*
