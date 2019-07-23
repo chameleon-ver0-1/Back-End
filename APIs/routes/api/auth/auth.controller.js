@@ -1,4 +1,18 @@
-var _DBPool = require('../lib/_DBPool');
+//var _DBPool = require('../lib/_DBPool');
+var mysql = require('mysql');
+
+// FIXME: DB Pool 지정된 위치에서 관리
+var pool = mysql.createPool({
+    host     : process.env.MYSQL_HOST,
+    port     : process.env.MYSQL_PORT,
+    database : process.env.MYSQL_DB_INFO,
+    user     : process.env.MYSQL_USER_INFO,
+    password : process.env.MYSQL_PW,
+    multipleStatements : true,
+    connectionLimit: 150,
+    multipleStatements: true,
+    charset  : 'utf8'
+});
 
 /*
     GET /api/auth/duplicateEmail
@@ -12,7 +26,7 @@ exports.duplicateEmail = (req, res) => {
     // FIXME: pool is not definded
     pool.getConnection(function(err, conn){
         if(!err){
-            console.log('MySql Connection Error!');
+            console.log('MySql Connection Success');
         }
 
         conn.query(sql, function(err, rows, fields) {
@@ -30,8 +44,7 @@ exports.duplicateEmail = (req, res) => {
             else
                 return res.status(400).json({message: "이미 존재하는 메일주소", data : false});
         });
-      });
-
+    });
 };
 
 /*

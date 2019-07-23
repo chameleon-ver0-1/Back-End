@@ -1,3 +1,4 @@
+// FIXME: DB Pool 지정된 위치에서 관리
 // require('dotenv').config({path: __dirname + '\\' + '.env'});
 
 // var generic_pool = require('generic-pool');
