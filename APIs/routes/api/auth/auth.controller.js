@@ -15,14 +15,14 @@
 // });
 
 const jwt = require('jsonwebtoken');
-var User = require('../../../models/UserInfo');
+var user = require('../../../models/UserInfo');
 
 require('dotenv').config({path: __dirname + '\\' + '.env'});
 
 signToken = user => {
   return jwt.sign({
     iss: 'Chameleon',
-    sub: user.id,
+    sub: user.email,
     iat: new Date().getTime(), // current time
     exp: new Date().setDate(new Date().getDate() +1) // current time + 1 day ahead
   }, process.env.JWT_SECRET);
@@ -82,24 +82,23 @@ exports.register = (req, res) => {
         password
     }
  */
-exports.signIn = (req, res) => {
+exports.signIn = (req, res, next) => {
     // res.status(200).json({email:req.body.email, password:req.body.password}); // Success
 
     // TODO: DB에 연결해서 로그인
-
-    User.findOne({
-        where: { email: req.body.email }
-    }).then(function(user) {
-        if (user && req.body.password === user.password) {
-            res.json({
-                token: user.getToken(),
+    // User.findOne({
+    //     where: { email: req.body.email }
+    // }).then(function(user) {
+    //     if (user && req.body.password === user.password) {
+            res.status(200).json({
+                token: signToken(req.user),
                 message:"signIn success"
             });
-        } else {
-            res.status(404).send('Failed : User not found');
-            throw err
-        }
-    }).catch(function(err) {
-        res.status(500).send('Cannot connect mongoDB');
-    });
+    //     } else {
+    //         res.status(404).send('Failed : User not found');
+    //         throw err
+    //     }
+    // }).catch(function(err) {
+    //     res.status(500).send('Cannot connect mongoDB');
+    // });
 }
