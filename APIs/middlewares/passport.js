@@ -6,7 +6,7 @@ const GooglePlusTokenStrategy = require('passport-google-plus-token');
 const FacebookTokenStrategy = require('passport-facebook-token');
 
 const keys = require('config/keys');
-const User = require('../models/UserInfo');
+const User = require('../models/user');
 
 // JSON WEB TOKENS STRATEGY
 passport.use(new JwtStrategy({

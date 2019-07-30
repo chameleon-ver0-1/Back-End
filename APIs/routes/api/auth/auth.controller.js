@@ -15,7 +15,7 @@
 // });
 
 const jwt = require('jsonwebtoken');
-var user = require('../../../models/UserInfo');
+var user = require('../../../models/user');
 
 require('dotenv').config({path: __dirname + '\\' + '.env'});
 
@@ -28,7 +28,7 @@ signToken = user => {
   }, process.env.JWT_SECRET);
 }
 
-var User = require('../../../models/UserInfo');
+var User = require('../../../models/user');
 
 /*
     GET /api/auth/duplicateEmail
