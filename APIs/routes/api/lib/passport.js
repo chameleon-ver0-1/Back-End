@@ -6,7 +6,7 @@ const GooglePlusTokenStrategy = require('passport-google-plus-token');
 const FacebookTokenStrategy = require('passport-facebook-token');
 
 const keys = require('config/keys');
-const User = require('models/user');
+const User = require('../models/UserInfo');
 
 // JSON WEB TOKENS STRATEGY
 passport.use(new JwtStrategy({
@@ -29,72 +29,74 @@ passport.use(new JwtStrategy({
   }
 }));
 
+// FIXME: KEY 변경 
 // FACEBOOK OAUTH STRATEGY
-passport.use('facebookToken', new FacebookTokenStrategy({
-  clientID: keys.facebookClientID,
-  clientSecret: keys.facebookClientSecret
-}, async (accessToken, refreshToken, profile, done) => {
-  try {
-    // console.log('profile', profile);
-    // console.log('accessToken', accessToken);
-    // console.log('refreshToken', refreshToken);
-    const name = profile.name.familyName + ' ' + profile.name.givenName;
+// passport.use('facebookToken', new FacebookTokenStrategy({
+//   clientID: keys.facebookClientID,
+//   clientSecret: keys.facebookClientSecret
+// }, async (accessToken, refreshToken, profile, done) => {
+//   try {
+//     // console.log('profile', profile);
+//     // console.log('accessToken', accessToken);
+//     // console.log('refreshToken', refreshToken);
+//     const name = profile.name.familyName + ' ' + profile.name.givenName;
 
-    const existingUser = await User.findOne({ "uid": profile.id });
-    if(existingUser) {
-      return done(null, existingUser);
-    }
+//     const existingUser = await User.findOne({ "uid": profile.id });
+//     if(existingUser) {
+//       return done(null, existingUser);
+//     }
 
-    const newUser = new User({
-        email: profile.emails[0].value,
-        userName: profile.displayName,
-        name: name,
-        profile_image: profile.photos[0].value,
-        provider: profile.provider,
-        uid: profile.id,
-    });
+//     const newUser = new User({
+//         email: profile.emails[0].value,
+//         userName: profile.displayName,
+//         name: name,
+//         profile_image: profile.photos[0].value,
+//         provider: profile.provider,
+//         uid: profile.id,
+//     });
 
-    await newUser.save();
-    done(null, newUser);
-  } catch(error) {
-    done(error, false, error.message);
-  }
-}));
+//     await newUser.save();
+//     done(null, newUser);
+//   } catch(error) {
+//     done(error, false, error.message);
+//   }
+// }));
 
+// FIXME: KEY 변경 
 // GOOGLE OAUTH STRATEGY
-passport.use('googleToken', new GooglePlusTokenStrategy({
-  clientID: keys.googleClientID,
-  clientScret: keys.googleClientSecret
-}, async (accessToken, refreshToken, profile, done) => {
-  try {
-    // console.log('accessToken', accessToken);
-    // console.log('refreshToken', refreshToken);
-    // console.log('profile', profile);
-    const name = profile.name.familyName + ' ' + profile.name.givenName;
+// passport.use('googleToken', new GooglePlusTokenStrategy({
+//   clientID: keys.googleClientID,
+//   clientScret: keys.googleClientSecret
+// }, async (accessToken, refreshToken, profile, done) => {
+//   try {
+//     // console.log('accessToken', accessToken);
+//     // console.log('refreshToken', refreshToken);
+//     // console.log('profile', profile);
+//     const name = profile.name.familyName + ' ' + profile.name.givenName;
 
-    // Check whether this current user exists in our DB
-    const existingUser = await User.findOne({ "uid": profile.id});
-    if(existingUser) {
-      return done(null, existingUser);
-    }
+//     // Check whether this current user exists in our DB
+//     const existingUser = await User.findOne({ "uid": profile.id});
+//     if(existingUser) {
+//       return done(null, existingUser);
+//     }
 
-    // If new account
-    const newUser = new User({
-        email: profile.emails[0].value,
-        userName: profile.displayName,
-        profile_image: profile.photos[0].value,
-        name: name,
-        provider: profile.provider,
-        uid: profile.id,
-    });
+//     // If new account
+//     const newUser = new User({
+//         email: profile.emails[0].value,
+//         userName: profile.displayName,
+//         profile_image: profile.photos[0].value,
+//         name: name,
+//         provider: profile.provider,
+//         uid: profile.id,
+//     });
 
-    await newUser.save();
-    done(null, newUser);
+//     await newUser.save();
+//     done(null, newUser);
 
-  } catch (error) {
-    done(error, false, error.message);
-  }
-}));
+//   } catch (error) {
+//     done(error, false, error.message);
+//   }
+// }));
 
 // LOCAL STRATEGY
 passport.use(new LocalStrategy({
@@ -127,6 +129,6 @@ passport.use(new LocalStrategy({
 module.exports = {
    passportSignIn: passport.authenticate('local', {session: false }),
    passportJWT: passport.authenticate('jwt', { session: false }),
-   passportGoogle: passport.authenticate('googleToken', { session: false }),
-   passportFacebook: passport.authenticate('facebookToken', { session : false }),
+  //  passportGoogle: passport.authenticate('googleToken', { session: false }),
+  //  passportFacebook: passport.authenticate('facebookToken', { session : false }),
 }
