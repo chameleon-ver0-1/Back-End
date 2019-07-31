@@ -1,23 +1,41 @@
-const mongoose = require('mongoose');
-const { Schema } = mongoose;
-const { Types: { ObjectId } } = Schema;
-
-const userInfoSchema = new Schema({
-    email: {
-        type: String,
-        required: true
-    },
-    name: {
-        type: String,
-        required: true
-    },
-    name_en: String,
-    profile_img: {
-        type: String,
-        default: "FIXME: default img 경로"
-    },
-    company: ObjectId,
-    dept: ObjectId
-});
-
-module.exports = mongoose.model('UserInfo', userInfoSchema);
+module.exports = (sequelize, DataTypes) => {
+    return sequelize.define('user', {
+        email: {
+            type: DataTypes.STRING(40),
+            allowNull: false,
+            unique: true,
+            primaryKey: true
+        },
+        password: {
+            type: DataTypes.STRING(100),
+            allowNull: false
+        },
+        name: {
+            type: DataTypes.STRING(20),
+            allowNull: false,
+        },
+        name_en: {
+            type: DataTypes.STRING(20),
+            allowNull: true,
+        },
+        profile_img: {
+            type: DataTypes.STRING(100),
+            defaultValue: 'FIXME/default/img/path'
+        },
+        company: {
+            type: DataTypes.STRING(20),
+            allowNull: true,
+        },
+        dept: {
+            type: DataTypes.STRING(20),
+            allowNull: true,
+        },
+        certificatedYn: {
+            type: DataTypes.STRING(1),
+            defaultValue: 'N'
+        }
+    }, {
+        timestamps: true,
+        paranoid: true
+    });
+}

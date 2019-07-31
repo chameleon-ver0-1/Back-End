@@ -2,11 +2,19 @@ const passport = require('passport');
 const JwtStrategy = require('passport-jwt').Strategy;
 const { ExtractJwt } = require('passport-jwt');
 const LocalStrategy  = require('passport-local').Strategy;
-const GooglePlusTokenStrategy = require('passport-google-plus-token');
-const FacebookTokenStrategy = require('passport-facebook-token');
 
-const keys = require('config/keys');
-const User = require('../models/user');
+const { User } = require('../../../models');
+const bcrypt = require('bcrypt');
+
+passport.serializeUser((user, done) => {
+  done(null, user.email);
+});
+
+passport.deserializeUser((email, done) => {
+  User.find({ where: { email }})
+    .then(user => done(null, user))
+    .catch(err => done(err));
+});
 
 // JSON WEB TOKENS STRATEGY
 passport.use(new JwtStrategy({
@@ -100,35 +108,31 @@ passport.use(new JwtStrategy({
 
 // LOCAL STRATEGY
 passport.use(new LocalStrategy({
-  usernameField: 'email'
+usernameField: 'email',
+passwordField: 'password'
 }, async (email, password, done) => {
-  try {
-    // Find the user given the email
-    const user = await User.findOne({ "email": email });
+        try {
+            const user = await User.find({ where: { email } });
 
-    // If not, handle it
-    if(!user) {
-      return done(null, false);
+            if (user) {
+              const result = await bcrypt.compare(password, user.password);
+              if (resuilt) {
+                done(null, user);
+              } else {
+                done(null, false, { message:'비밀번호가 일치하지 않습니다.' });
+              }
+            } else {
+              done(null, false, { message:'가입되지 않은 회원입니다.'});
+            }
+
+          } catch (error) {
+            console.error(error);
+            done(error);
+          }
     }
-
-    // check if the password is correct
-    const isMatch = await user.isValidPassword(password);
-
-    // If not, handle it
-    if(!isMatch) {
-      return done(null, false);
-    }
-
-    // Otherwist, return the user
-    done(null, user);
-    } catch (error) {
-      done(error, false);
-    }
-}));
+));
 
 module.exports = {
    passportSignIn: passport.authenticate('local', {session: false }),
-   passportJWT: passport.authenticate('jwt', { session: false }),
-  //  passportGoogle: passport.authenticate('googleToken', { session: false }),
-  //  passportFacebook: passport.authenticate('facebookToken', { session : false }),
-}
+   passportJWT: passport.authenticate('jwt', { session: false })
+  }
