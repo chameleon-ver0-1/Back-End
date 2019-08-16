@@ -1,45 +1,66 @@
-const jwt = require('jsonwebtoken');
-const passport = require('passport');
-const bcrypt = require('bcrypt');
-var { User } = require('../../../models');
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+var { User } = require("../../../models");
 
-require('dotenv').config({path: __dirname + '\\' + '.env'});
+require("dotenv").config({ path: __dirname + "\\" + ".env" });
 
 signToken = (email, password) => {
-  return jwt.sign({
-    iss: 'Chameleon',
-    sub: email,
-    iat: new Date().getTime(), // current time
-    exp: new Date().setDate(new Date().getDate() +1) // current time + 1 day ahead
-  }, process.env.JWT_SECRET);
+  return jwt.sign(
+    {
+      iss: "Chameleon",
+      sub: email,
+      iat: new Date().getTime(), // current time
+      exp: new Date().setDate(new Date().getDate() + 1) // current time + 1 day ahead
+    },
+    process.env.JWT_SECRET
+  );
 };
 
-/* login */
-exports.signIn = (req, res, next) => {
-    console.log("email => " + req.body.email);
+/* join */
+exports.join = async (req, res, next) => {
+  const { email, password, name } = req.body;
+  try {
+    const exUser = await User.find({ where: { email : email } });
+    if (exUser) {
+      res.status(202).json({ status : "이미 가입된 이메일입니다.",
+                             });
+    }
 
-    // const token = signToken(req.body.email, req.body.password);
-    // res.status(200).json({token: token});
-
-    passport.authenticate('local', (authError, user, info) => {
-        if (authError) {
-            console.error(authError);
-            return next(authError);
-        }
-        if (!user) {
-            req.flash('loginError', info.message);
-            return res.redirect('/');
-        }
-
-        return req.login(user, (loginError) => {
-            if(loginError) {
-                console.error(loginError);
-                return next(loginError);
-            }
-
-            return res.redirect('/');
-        });
+    const hash = await bcrypt.hash(password, 24);
+    await User.create({
+      email,
+      nick,
+      password: hash
     });
+    return res.redirect("/");
+  } catch (error) {
+    console.error(error);
+    return next(error);
+  }
+};
+
+/*
+    POST /api/auth/signIn
+    {
+        email,
+        password
+    }
+*/
+exports.signIn = (req, res, next) => {
+  console.log("signIn: " + new Date().getTime() + ", email => " + req.body.email);
+
+  const token = signToken(req.body.email);
+  res.status(201).json({
+    status: 201,
+    message: "로그인 성공",
+    data: {
+      accessToken: {
+        token: token,
+        iat: new Date().getTime(),
+        exp: new Date().setDate(new Date().getDate() + 1)
+      }
+    }
+  });
 };
 
 /*
@@ -47,11 +68,16 @@ exports.signIn = (req, res, next) => {
         ?email={email}
  */
 exports.duplicateEmail = (req, res) => {
-    const email = req.query.email;
+  const email = req.query.email;
 
-    User.find({"email":email});
+  User.find({ email: email });
 };
 
+exports.refreshToken = (req, res) => {
+  const token = req.body.refreshToken;
+
+
+}
 /*
     POST /api/auth/register
     {
@@ -60,5 +86,5 @@ exports.duplicateEmail = (req, res) => {
     }
 */
 exports.register = (req, res) => {
-    res.status(200).send('this router is working');
+  res.status(200).send("this router is working");
 };

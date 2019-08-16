@@ -1,12 +1,11 @@
 const router = require('express').Router();
 const controller = require('./auth.controller');
+const auth = require('./auth');
 
-const passport = require('passport');
+// const passport = require('passport');
 
-router.post('/register', controller.register);
-router.get('/duplicateEmail', controller.duplicateEmail);
-
-// TODO: 로그인 API 구현
 router.post('/signIn', controller.signIn);
+
+router.post('/register', auth.isAuthenticated(), controller.register);
 
 module.exports = router;
