@@ -16,6 +16,8 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING(40)
         }
     }, {
+        charset: 'utf8',
+        collate: 'utf8_unicode_ci',
         timestamps: true,
         paranoid: true
     });

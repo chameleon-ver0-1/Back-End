@@ -1,6 +1,5 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-var { User } = require("../../../models");
 
 require("dotenv").config({ path: __dirname + "\\" + ".env" });
 
@@ -18,25 +17,27 @@ signToken = (email, password) => {
 
 /* join */
 exports.join = async (req, res, next) => {
-  const { email, password, name } = req.body;
-  try {
-    const exUser = await User.find({ where: { email : email } });
-    if (exUser) {
-      res.status(202).json({ status : "이미 가입된 이메일입니다.",
-                             });
-    }
+  // TODO: 회원가입 메소드 구현
 
-    const hash = await bcrypt.hash(password, 24);
-    await User.create({
-      email,
-      nick,
-      password: hash
-    });
-    return res.redirect("/");
-  } catch (error) {
-    console.error(error);
-    return next(error);
-  }
+  // const { email, password, name } = req.body;
+  // try {
+  //   const exUser = await User.find({ where: { email : email } });
+  //   if (exUser) {
+  //     res.status(202).json({ status : "이미 가입된 이메일입니다.",
+  //                            });
+  //   }
+
+  //   const hash = await bcrypt.hash(password, 24);
+  //   await User.create({
+  //     email,
+  //     nick,
+  //     password: hash
+  //   });
+  //   return res.redirect("/");
+  // } catch (error) {
+  //   console.error(error);
+  //   return next(error);
+  // }
 };
 
 /*
@@ -63,28 +64,8 @@ exports.signIn = (req, res, next) => {
   });
 };
 
-/*
-    GET /api/auth/duplicateEmail
-        ?email={email}
- */
-exports.duplicateEmail = (req, res) => {
-  const email = req.query.email;
 
-  User.find({ email: email });
-};
-
-exports.refreshToken = (req, res) => {
-  const token = req.body.refreshToken;
-
-
-}
-/*
-    POST /api/auth/register
-    {
-        username,
-        password
-    }
-*/
+// jwt test
 exports.register = (req, res) => {
   res.status(200).send("this router is working");
 };
