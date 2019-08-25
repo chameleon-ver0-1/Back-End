@@ -35,7 +35,7 @@ passport.use(new JwtStrategy({
 
 /* GOOGLE OAUTH STRATEGY */
 // passport.use('googleToken', new GooglePlusTokenStrategy({
-//   clientID: keys.googleClientID,
+//   clientID: process.env.googleClientID,
 //   clientScret: keys.googleClientSecret
 // }, async (accessToken, refreshToken, profile, done) => {
 //   try {
