@@ -10,7 +10,7 @@ require('dotenv').config({path: __dirname + '\\' + '.env'});
 /* JSON WEB TOKENS STRATEGY */
 passport.use(new JwtStrategy({
   jwtFromRequest: ExtractJwt.fromHeader('authorization'),
-  secretOrKey: 'chameleon_secret'
+  secretOrKey: process.env.JWT_SECRET
 }, async (payload, done) => {
   try {
     // Find the user specified in token
