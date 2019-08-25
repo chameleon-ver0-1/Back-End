@@ -52,7 +52,6 @@ exports.signIn = (req, res, next) => {
 
   const token = signToken(req.body.email);
   res.status(201).json({
-    status: 201,
     message: "로그인 성공",
     data: {
       accessToken: {
