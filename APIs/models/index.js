@@ -14,8 +14,9 @@ db.Sequelize = Sequelize;
 
 db.User = require('./user')(sequelize, Sequelize);
 db.Project = require('./project')(sequelize, Sequelize);
+db.ProjectUser = require('./project_user')(sequelize, Sequelize);
 
-db.User.belongsToMany(db.Project, { through:'project_users' });
-db.Project.belongsToMany(db.User, { through:'project_users' });
+db.User.belongsToMany(db.Project, { through:'project_user', foreignKey: 'email' });
+db.Project.belongsToMany(db.User, { through:'project_user', foreignKey: 'projectName' });
 
 module.exports = db;

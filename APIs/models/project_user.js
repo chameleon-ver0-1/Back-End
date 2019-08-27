@@ -1,14 +1,22 @@
 module.exports = (sequelize, DataTypes) => {
-    return sequelize.define('project', {
+    return sequelize.define('project_user', {
         projectName: {
             type: DataTypes.STRING(40),
             allowNull: false,
-            unique: true,
             primaryKey: true
         },
-        projectCode: { //mongodb objectid를 담을 데이터
+        email: {
             type: DataTypes.STRING(40),
             allowNull: false,
+            primaryKey: true
+        },
+        projectRole: {
+            type: DataTypes.STRING(40),
+            allowNull: true
+        },
+        isAdminYn: {
+            type: DataTypes.STRING(1),
+            defaultValue: 'N'
         }
     }, {
         charset: 'utf8',
@@ -16,4 +24,4 @@ module.exports = (sequelize, DataTypes) => {
         timestamps: true,
         paranoid: true
     });
-}
+};

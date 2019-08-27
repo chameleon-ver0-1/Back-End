@@ -11,7 +11,8 @@ signToken = (email, password) => {
       iat: new Date().getTime(), // current time
       exp: new Date().setDate(new Date().getDate() + 1) // current time + 1 day ahead
     },
-    process.env.JWT_SECRET
+    // process.env.JWT_SECRET
+    'chameleon_secret'
   );
 };
 
