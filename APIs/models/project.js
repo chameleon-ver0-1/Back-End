@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
             unique: true,
             primaryKey: true
         },
-        projectCode: {
+        projectCode: { //mongodb objectid를 담을 데이터
             type: DataTypes.STRING(40),
             allowNull: false,
         }
