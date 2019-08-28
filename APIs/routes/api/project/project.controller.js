@@ -1,9 +1,10 @@
-const bcrypt = require("bcrypt"); //-->crypto 모듈
+// const bcrypt = require("bcrypt"); //-->crypto 모듈
 
 const model = require('../../../models');
+const model_mg = require('../../../models_mg');
 require("dotenv").config({ path: __dirname + "\\" + ".env" });
 
-//TODO: 프로젝트 개설할때 태그 설정시 있는 사용자인지 판단하는 메소드 추가
+//TODO: 예지 - 프로젝트 개설할때 태그 설정시 있는 사용자인지 판단하는 메소드 추가
 
 /*
     POST /api/project/create
@@ -13,11 +14,13 @@ require("dotenv").config({ path: __dirname + "\\" + ".env" });
 */
 exports.create = (req, res, next) => {
     console.log(req.user.email);
-    // TODO: 예지 - 프로젝트이름, 소속부서, URL, 참여자를 저장할 변수 선언
+    //TODO: 예지 - 프로젝트이름, 소속부서, 참여자를 저장할 변수 선언
     const projectName = req.body.projectName;
     // const projectRoles = req.body.projectRoles;
     // const projectURL = req.body.projectURL;
     // const projectParticipants = req.body.projectParticipants;
+
+    //TODO: 예지 - 몽고디비에있는 프로젝트 objectid를 받아와서 project code로 지정
 
     model.Project.findOne({
         where : { projectName : projectName }

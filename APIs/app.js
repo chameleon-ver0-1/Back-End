@@ -5,6 +5,7 @@ const cors = require('cors');
 require('dotenv').config({path: __dirname + '\\' + '.env'});
 
 const { sequelize } = require('./models');
+const { mongoose }  = require('./models_mg');
 
 const app = express();
 app.use(bodyParser.json());
