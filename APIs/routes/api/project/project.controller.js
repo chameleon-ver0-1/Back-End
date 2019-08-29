@@ -16,14 +16,19 @@ exports.emailCheck = (req,res,next) =>{
         where : { email : req.body.email }
     })
     .then(async(email) => {
-        if (email) {
-            res.status(201).json({
-                message: '존재하는 사용자'
+        if (!email) {
+            res.status(201).json({ 
+                message : "존재하지 않는 사용자",
             });
         }
         else{
-            res.status(202).json({ 
-                message : "존재하지 않는 사용자",
+            if(req.user.email==req.body.email){
+                res.status(202).json({
+                    message: '본인'
+                });
+            }
+            res.status(202).json({
+                message: '존재하는 사용자'
             });
         }
     });
@@ -50,8 +55,7 @@ exports.create = (req, res, next) => {
     .then(async(project) => {
         if (project) {
             res.status(202).json({
-                message: '중복된 프로젝트명',
-                data: false
+                message: '중복된 프로젝트명'
             });
         }
         else{
@@ -65,37 +69,36 @@ exports.create = (req, res, next) => {
                     //TODO: 예지 - project_user에 우선 개설자라는 표시먼저 그외의 참여자들의 계정에도 프로젝트연결
                     model.ProjectUser.create({
                         projectName: projectName,
-                        
+                        email : req.user.email,
+                        projectRole : null,
+                        isAdminYn : 'Y',
+                        createdAt : new Date().getTime(),
+                        updatedAt : new Date().getTime()
+                        //timestamp 넣어줘야함
                     }).then(async(result) => {
-
+                        for(let i=0; i<projectParticipants.length; i++){
+                            model.ProjectUser.create({
+                                projectName: projectName,
+                                email : projectParticipants[i],
+                                projectRole : null,
+                                isAdminYn : 'N',
+                                createdAt : new Date().getTime(),
+                                updatedAt : new Date().getTime()
+                            }).then(async(result) => {
+                                if(!result){
+                                    res.status(202).json({
+                                        message: '저장 실패'
+                                    });
+                                }
+                            });  
+                        }
+                        res.status(201).json({
+                            message: '저장 완료'
+                        });
+                        console.log('Saved!');
                     });
-                    res.status(201).json({
-                        message: '저장 완료'
-                    });
-                    console.log('Saved!');
                 }
             });
-
-            // try {
-            //     const hash = await bcrypt.hash(projectName, 40);
-        
-            //     model.Project.create({
-            //         projectName: projectName,
-            //         projectCode: hash,
-            //         createdAt: new Date().getTime(),
-            //         updatedAt: new Date().getTime()
-            //     })
-        
-            //     .then(() => {
-            //         res.status(201).json({
-            //             message:'프로젝트 생성 성공',
-            //             data: false
-            //         });
-            //     });
-                
-            // } catch (error) {
-            //     console.log('Error');
-            // }
         }
     });
 };
