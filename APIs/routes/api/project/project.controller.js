@@ -4,7 +4,9 @@ const model = require('../../../models');
 const model_mg = require('../../../models_mg');
 require("dotenv").config({ path: __dirname + "\\" + ".env" });
 
-//TODO: 예지 - 프로젝트 개설할때 태그 설정시 있는 사용자인지 판단
+//201 - 성공 / 202 - 실패같은성공
+
+//TODO: 예지 - 프로젝트 개설할때 태그 설정시 존재하는 사용자인지 아닌지 판단
 /*
     post /api/project/emailCheck
     {
@@ -17,19 +19,21 @@ exports.emailCheck = (req,res,next) =>{
     })
     .then(async(email) => {
         if (!email) {
-            res.status(201).json({ 
+            res.status(202).json({ 
                 message : "존재하지 않는 사용자",
             });
         }
         else{
             if(req.user.email==req.body.email){
-                res.status(202).json({
+                res.status(201).json({
                     message: '본인'
                 });
             }
-            res.status(202).json({
-                message: '존재하는 사용자'
-            });
+            else{
+                res.status(201).json({
+                    message: '존재하는 사용자'
+                });
+            }   
         }
     });
 };
@@ -43,7 +47,7 @@ exports.emailCheck = (req,res,next) =>{
     }
 */
 exports.create = (req, res, next) => {
-    console.log(req.user.email);
+    // console.log(req.user.email);
     //TODO: 예지 - 프로젝트이름, 소속부서, 참여자를 저장할 변수 선언
     const projectName = req.body.projectName;
     const projectRoles = req.body.projectRoles;
@@ -101,4 +105,33 @@ exports.create = (req, res, next) => {
             });
         }
     });
+};
+
+//TODO: 예지 - 참여중인 프로젝트 목록
+/*
+    GET /api/project/list
+    {
+    }
+*/
+exports.list = (req, res, next) => {
+    model.ProjectUser.findAll({
+        attributes: ['projectName'],
+        where : { email : req.user.email }
+    }).then(async(data) => {
+        if(data){
+            res.status(201).json({
+                message: '목록 가져오기 성공',
+                data : data
+            });
+        }
+        else{
+            res.status(202).json({
+                message: '목록 가져오기 실패',
+                data : null
+            });
+        }
+    }).catch(function(err) {
+        console.log(err);
+        
+    }); 
 };
