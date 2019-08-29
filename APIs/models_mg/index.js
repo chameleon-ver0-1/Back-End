@@ -12,9 +12,8 @@ mongodb.once('open', function(){
 });
 mongoose.connect('mongodb://localhost/develop');
 
-//TODO: 예지 - 모델 생성(의문..=db변수의 존재의이유)
 db.mongoose = mongoose;
-db.Project = require('./project')(mongoose);
-mongoose.model('project', db.Project);
+db.Project = require('./project')(db.mongoose);
+
 
 module.exports = db;
