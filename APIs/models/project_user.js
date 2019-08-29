@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
     return sequelize.define('project_user', {
-        projectName: {// id로 바뀔예정
+        projectName: {
             type: DataTypes.STRING(40),
             allowNull: false,
             primaryKey: true
