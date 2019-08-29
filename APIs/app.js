@@ -5,6 +5,7 @@ const cors = require('cors');
 require('dotenv').config({path: __dirname + '\\' + '.env'});
 
 const { sequelize } = require('./models');
+const { mongoose }  = require('./models_mg');
 
 const app = express();
 app.use(bodyParser.json());
@@ -22,3 +23,4 @@ app.use('/api', require('./routes/api'));
 app.listen(4000, () => {
     console.log('Express가 4000번 포트에서 리스닝 중이라네!');
 });
+

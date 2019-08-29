@@ -8,5 +8,6 @@ const passportJWT = passport.authenticate('jwt', { session: false });
 
 /* ROUTING METHOD */
 router.post('/create', passportJWT, controller.create);
+router.post('/emailCheck', passportJWT, controller.emailCheck);
 
 module.exports = router;
