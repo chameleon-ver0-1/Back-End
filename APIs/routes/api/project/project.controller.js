@@ -2,7 +2,9 @@
 
 const model = require('../../../models');
 const model_mg = require('../../../models_mg');
-require("dotenv").config({ path: __dirname + "\\" + ".env" });
+require("dotenv").config({
+    path: __dirname + "\\" + ".env"
+});
 
 //201 - 성공 / 202 - 실패같은성공
 
@@ -13,8 +15,9 @@ require("dotenv").config({ path: __dirname + "\\" + ".env" });
         email
     }
 */
-exports.emailCheck = (req,res,next) =>{
+exports.emailCheck = (req, res, next) => {
     model.User.findOne({
+<<<<<<< HEAD
         where : { email : req.body.email }
     })
     .then(async(email) => {
@@ -28,14 +31,29 @@ exports.emailCheck = (req,res,next) =>{
                 res.status(201).json({
                     message: '본인'
                 });
+=======
+            where: {
+                email: req.body.email
+>>>>>>> dbcbf7e11709f53bf63e4cd59ccc50019bd9a759
             }
-            else{
-                res.status(201).json({
-                    message: '존재하는 사용자'
+        })
+        .then(async (email) => {
+            if (!email) {
+                res.status(202).json({
+                    message: "존재하지 않는 사용자",
                 });
-            }   
-        }
-    });
+            } else {
+                if (req.user.email == req.body.email) {
+                    res.status(201).json({
+                        message: '본인'
+                    });
+                } else {
+                    res.status(201).json({
+                        message: '존재하는 사용자'
+                    });
+                }
+            }
+        });
 };
 //TODO: 예지 - 프로젝트 생성
 /*
@@ -54,57 +72,106 @@ exports.create = (req, res, next) => {
     const projectParticipants = req.body.projectParticipants;
 
     model.ProjectUser.findOne({
-        where : { projectName : projectName }
-    }) 
-    .then(async(project) => {
-        if (project) {
-            res.status(202).json({
-                message: '중복된 프로젝트명'
-            });
-        }
-        else{
-            //TODO: 예지 - 몽고디비에있는 프로젝트에 name, roles 저장
-            const Project= model_mg.Project({name:projectName, roles:projectRoles});
-        
-            Project.save(function(error, data){
-                if(error){
-                    console.log(error);
-                }else{
+            where: {
+                projectName: projectName
+            }
+        })
+        .then(async (project) => {
+            if (project) {
+                res.status(202).json({
+                    message: '중복된 프로젝트명'
+                });
+            } else {
+                //TODO: 예지 - 몽고디비에있는 프로젝트에 name, roles 저장
+                model_mg.Project.create({
+                    name: projectName,
+                    roles: projectRoles
+                }).then(async (result) => {
                     //TODO: 예지 - project_user에 우선 개설자라는 표시먼저 그외의 참여자들의 계정에도 프로젝트연결
                     model.ProjectUser.create({
                         projectName: projectName,
-                        email : req.user.email,
-                        projectRole : null,
-                        isAdminYn : 'Y',
-                        createdAt : new Date().getTime(),
-                        updatedAt : new Date().getTime()
+                        email: req.user.email,
+                        projectRole: null,
+                        isAdminYn: 'Y',
+                        createdAt: new Date().getTime(),
+                        updatedAt: new Date().getTime()
                         //timestamp 넣어줘야함
-                    }).then(async(result) => {
-                        for(let i=0; i<projectParticipants.length; i++){
+                    }).then(async (result) => {
+                        for (let i = 0; i < projectParticipants.length; i++) {
                             model.ProjectUser.create({
                                 projectName: projectName,
-                                email : projectParticipants[i],
-                                projectRole : null,
-                                isAdminYn : 'N',
-                                createdAt : new Date().getTime(),
-                                updatedAt : new Date().getTime()
-                            }).then(async(result) => {
-                                if(!result){
-                                    res.status(202).json({
-                                        message: '저장 실패'
-                                    });
-                                }
-                            });  
+                                email: projectParticipants[i],
+                                projectRole: null,
+                                isAdminYn: 'N',
+                                createdAt: new Date().getTime(),
+                                updatedAt: new Date().getTime()
+                            })
                         }
-                        res.status(201).json({
-                            message: '저장 완료'
+                        // TODO: models_mg.issue.columns에
+                        /*
+                            status -> todo, doing, done
+                            taskIds -> []
+                            projectId -> 해당 프로젝트의 objectId 로 3개 만들어서 몽고디비에 CREATE
+                        */
+                        model_mg.Project.findOne({
+                            name: result.projectName
+                        }).then(async (result) => {
+                            if(result){
+                                console.log(result._id);
+                                
+                                model_mg.Issue.columns.create({
+                                    status: "TODO",
+                                    taskIds: [],
+                                    projectId: result.id
+                                }).then(async(data)=>{
+                                    if(result){
+                                        model_mg.Issue.columns.create({
+                                            status: "DOING",
+                                            taskIds: [],
+                                            projectId: result.id
+                                        }).then(async(data)=>{
+                                            if(result){
+                                                model_mg.Issue.columns.create({
+                                                    status: "DONE",
+                                                    taskIds: [],
+                                                    projectId: result.id
+                                                }).then(async(data)=>{
+                                                    if(result){
+                                                        res.status(201).json({
+                                                            message: '최종 저장 완료'
+                                                        });
+                                                    }
+                                                    else{
+                                                        res.status(202).json({
+                                                            message: 'done 저장 실패'
+                                                        });
+                                                    }
+                                                });
+                                            }
+                                            else{
+                                                res.status(202).json({
+                                                    message: 'doing 저장 실패'
+                                                });
+                                            }
+                                        });
+                                    }
+                                    else{
+                                        res.status(202).json({
+                                            message: 'todo 저장 실패'
+                                        });
+                                    }
+                                });
+                            }
+                            else{
+                                res.status(202).json({
+                                    message: 'project id 불러오기 실패'
+                                });
+                            }
                         });
-                        console.log('Saved!');
                     });
-                }
-            });
-        }
-    });
+                });
+            }
+        });
 };
 
 //TODO: 예지 - 참여중인 프로젝트 목록
@@ -116,22 +183,20 @@ exports.create = (req, res, next) => {
 exports.list = (req, res, next) => {
     model.ProjectUser.findAll({
         attributes: ['projectName'],
-        where : { email : req.user.email }
-    }).then(async(data) => {
-        if(data){
+        where: {
+            email: req.user.email
+        }
+    }).then(async (data) => {
+        if (data) {
             res.status(201).json({
                 message: '목록 가져오기 성공',
-                data : data
+                data: data
             });
-        }
-        else{
+        } else {
             res.status(202).json({
                 message: '목록 가져오기 실패',
-                data : null
+                data: false
             });
         }
-    }).catch(function(err) {
-        console.log(err);
-        
-    }); 
+    });
 };

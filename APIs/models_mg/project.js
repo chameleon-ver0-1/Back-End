@@ -3,7 +3,11 @@ module.exports = (mongoose) => {
     return mongoose.model('project', 
     mongoose.Schema({
         // _id : ObjectId, //자동생성됨
-        name: String,
+        name: {
+            type: String,
+            required: true,
+            unique: true
+        },
         roles: [String]
     }));
 }
