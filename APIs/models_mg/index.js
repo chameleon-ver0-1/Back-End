@@ -5,6 +5,7 @@ const env = process.env.NODE_ENV || 'development';
 const db = {};
 
 //TODO: 예지 - MongoDB 연결
+mongoose.set('useCreateIndex', true);
 var mongodb = mongoose.connection;
 
 mongodb.on('error', console.error);
@@ -16,5 +17,6 @@ mongoose.connect('mongodb://localhost/develop');
 db.mongoose = mongoose;
 db.Project = require('./project')(db.mongoose);
 db.Issue = require('./issue')(db.mongoose);
+db.Conf_log = require('./conf_log')(db.mongoose);
 
 module.exports = db;
