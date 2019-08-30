@@ -19,7 +19,7 @@ exports.emailCheck = (req,res,next) =>{
     })
     .then(async(email) => {
         if (!email) {
-            res.status(202).json({ 
+            res.status(202).json({
                 message : "존재하지 않는 사용자",
             });
         }

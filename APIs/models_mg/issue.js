@@ -1,12 +1,12 @@
-issue_columns = (mongoose) => { return mongoose.model('issue_columns', 
+issue_columns = (mongoose) => { return mongoose.model('columns', 
     mongoose.Schema({
         status: String,
-        taskIds: [mongoose.Schema.Types.ObjectId],
-        projectId: mongoose.Schema.Types.ObjectId,
+        taskIds: {type: mongoose.Schema.Types.ObjectId, ref: 'tasks'},
+        projectId: {type: mongoose.Schema.Types.ObjectId, ref: 'project'},
     })
 )};
 
-issue_tasks = (mongoose) => { return mongoose.model('issue_tasks', 
+issue_tasks = (mongoose) => { return mongoose.model('tasks', 
     mongoose.Schema({
         title: String,
         dDay: Date,
@@ -14,11 +14,11 @@ issue_tasks = (mongoose) => { return mongoose.model('issue_tasks',
         isConfScheduled: Boolean,
         attachment: String,
         dept: String,
-        comentIds: [mongoose.Schema.Types.ObjectId] 
+        comentIds: [mongoose.Schema.Types.ObjectId]
     })
 )};
 
-issue_comments = (mongoose) => { return mongoose.model('issue_comments',
+issue_comments = (mongoose) => { return mongoose.model('comments',
     mongoose.Schema({
         email: String,
         name: String,
