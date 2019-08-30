@@ -2,7 +2,7 @@ issue_columns = (mongoose) => { return mongoose.model('issue_columns',
     mongoose.Schema({
         status: String,
         taskIds: [mongoose.Schema.Types.ObjectId],
-        projectId: mongoose.Schema.Types.ObjectId,
+        projectId: mongoose.Schema.Types.ObjectId
     })
 )};
 
