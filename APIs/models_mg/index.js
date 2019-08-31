@@ -6,6 +6,7 @@ const db = {};
 
 //TODO: 예지 - MongoDB 연결
 mongoose.set('useCreateIndex', true);
+mongoose.set('useFindAndModify', false);
 var mongodb = mongoose.connection;
 
 mongodb.on('error', console.error);

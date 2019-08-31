@@ -49,113 +49,79 @@ exports.emailCheck = (req, res, next) => {
     }
 */
 exports.create = (req, res, next) => {
-    // console.log(req.user.email);
-    //TODO: 예지 - 프로젝트이름, 소속부서, 참여자를 저장할 변수 선언
-    const projectName = req.body.projectName;
-    const projectRoles = req.body.projectRoles;
-    const projectParticipants = req.body.projectParticipants;
+    try {
+        var projectName = req.body.projectName;
+        var projectRoles = req.body.projectRoles;
+        var projectParticipants = req.body.projectParticipants;
 
+        var projectLeader = req.user.email;
+        projectParticipants.push(projectLeader);
+    } catch {
+        res.status(400).send('Please check Params');
+    }
+
+    // FIXME: 중복된 프로젝트명인지 확인
+    // -> 나중에 다른 API로 뺄 것(프젝이름 입력 종료하면, 지후가 그 API 호출해서
+    // 옆에 빨간글씨로 "*중복된 프로젝트명입니다."")
     model.ProjectUser.findOne({
-            where: {
-                projectName: projectName
-            }
-        })
-        .then(async (project) => {
-            if (project) {
-                res.status(202).json({
-                    message: '중복된 프로젝트명'
-                });
-            } else {
-                //TODO: 예지 - 몽고디비에있는 프로젝트에 name, roles 저장
-                model_mg.Project.create({
-                    name: projectName,
-                    roles: projectRoles
-                }).then(async (result) => {
-                    //TODO: 예지 - project_user에 우선 개설자라는 표시먼저 그외의 참여자들의 계정에도 프로젝트연결
-                    model.ProjectUser.create({
-                        projectName: projectName,
-                        email: req.user.email,
-                        projectRole: null,
-                        isAdminYn: 'Y',
-                        createdAt: new Date().getTime(),
-                        updatedAt: new Date().getTime()
-                        //timestamp 넣어줘야함
-                    }).then(async (result) => {
-                        for (let i = 0; i < projectParticipants.length; i++) {
-                            model.ProjectUser.create({
-                                projectName: projectName,
-                                email: projectParticipants[i],
-                                projectRole: null,
-                                isAdminYn: 'N',
-                                createdAt: new Date().getTime(),
-                                updatedAt: new Date().getTime()
-                            })
-                        }
-                        // TODO: models_mg.issue.columns에
-                        /*
-                            status -> todo, doing, done
-                            taskIds -> []
-                            projectId -> 해당 프로젝트의 objectId 로 3개 만들어서 몽고디비에 CREATE
-                        */
-                        model_mg.Project.findOne({
-                            name: result.projectName
-                        }).then(async (result) => {
-                            if(result){
-                                console.log(result._id);
-                                
-                                model_mg.Issue.columns.create({
-                                    status: "TODO",
-                                    taskIds: [],
-                                    projectId: result.id
-                                }).then(async(data)=>{
-                                    if(result){
-                                        model_mg.Issue.columns.create({
-                                            status: "DOING",
-                                            taskIds: [],
-                                            projectId: result.id
-                                        }).then(async(data)=>{
-                                            if(result){
-                                                model_mg.Issue.columns.create({
-                                                    status: "DONE",
-                                                    taskIds: [],
-                                                    projectId: result.id
-                                                }).then(async(data)=>{
-                                                    if(result){
-                                                        res.status(201).json({
-                                                            message: '최종 저장 완료'
-                                                        });
-                                                    }
-                                                    else{
-                                                        res.status(202).json({
-                                                            message: 'done 저장 실패'
-                                                        });
-                                                    }
-                                                });
-                                            }
-                                            else{
-                                                res.status(202).json({
-                                                    message: 'doing 저장 실패'
-                                                });
-                                            }
-                                        });
-                                    }
-                                    else{
-                                        res.status(202).json({
-                                            message: 'todo 저장 실패'
-                                        });
-                                    }
-                                });
-                            }
-                            else{
-                                res.status(202).json({
-                                    message: 'project id 불러오기 실패'
-                                });
-                            }
-                        });
-                    });
-                });
-            }
+        where: { projectName: projectName }
+    }).then((project) => {
+        if (project) {
+            res.status(202).json({
+                message: '중복된 프로젝트명'
+            });
+        }
+    }).catch((err) => {
+        res.status(400).send('DB Error');
+    });
+
+    // 프로젝트 참여자 먼저 추가
+    var isAdminYn;
+    projectParticipants.forEach(participant => {
+        if (participant === projectLeader) {
+            isAdminYn = 'Y'
+        } else {
+            isAdminYn = 'N'
+        }
+
+        model.ProjectUser.create({
+            projectName: projectName,
+            email: participant,
+            isAdminYn: isAdminYn,
+            createdAt: new Date().getTime(),
+            updatedAt: new Date().getTime()
+        }).then((result) => {
+            console.log(result);
+        }).catch((err) => {
+            console.log(err);
         });
+    });
+
+    // 프로젝트 생성 후 이슈 columns 생성
+    model_mg.Project.create({
+        name: projectName,
+        roles: projectRoles
+    }).then((project) => {
+        var statusList = ["TODO", "DOING", "DONE"]
+
+        statusList.forEach(status => {
+            model_mg.Issue.column.create({
+                status: status,
+                taskIds: [],
+                projectId: project.id
+            }).then((column) => {
+                if (!column)
+                    res.status(202).send('Cannot create Issue columns');
+
+                console.log(column);
+            });
+        });
+    });
+
+    res.status(200).json({
+        message: '프로젝트 생성 성공',
+        data: false
+    });
 };
 
 //TODO: 예지 - 참여중인 프로젝트 목록

@@ -1,12 +1,12 @@
-issue_columns = (mongoose) => { return mongoose.model('issue_columns', 
+issue_column = (mongoose) => { return mongoose.model('column', 
     mongoose.Schema({
         status: String,
-        taskIds: [mongoose.Schema.Types.ObjectId],
-        projectId: mongoose.Schema.Types.ObjectId
+        taskIds: [{type: mongoose.Schema.Types.ObjectId, ref: 'task'}],
+        projectId: {type: mongoose.Schema.Types.ObjectId, ref: 'project'},
     })
 )};
 
-issue_tasks = (mongoose) => { return mongoose.model('issue_tasks', 
+issue_task = (mongoose) => { return mongoose.model('task', 
     mongoose.Schema({
         title: String,
         dDay: Date,
@@ -14,11 +14,14 @@ issue_tasks = (mongoose) => { return mongoose.model('issue_tasks',
         isConfScheduled: Boolean,
         attachment: String,
         dept: String,
-        comentIds: [mongoose.Schema.Types.ObjectId] 
+        writerName: String,
+        writerNameEn: String,
+        writerImg: String,
+        comentIds: [{type: mongoose.Schema.Types.ObjectId, ref: 'comment'}]
     })
 )};
 
-issue_comments = (mongoose) => { return mongoose.model('issue_comments',
+issue_comment = (mongoose) => { return mongoose.model('comment',
     mongoose.Schema({
         email: String,
         name: String,
@@ -30,8 +33,8 @@ issue_comments = (mongoose) => { return mongoose.model('issue_comments',
 
 module.exports = (mongoose) => {
     return issue = {
-        columns: issue_columns(mongoose),
-        tasks: issue_tasks(mongoose),
-        comments: issue_comments(mongoose)
+        column: issue_column(mongoose),
+        task: issue_task(mongoose),
+        comment: issue_comment(mongoose)
     }
 }
