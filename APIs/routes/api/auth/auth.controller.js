@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const model = require("../../../models");
 
 require("dotenv").config({ path: __dirname + "\\" + ".env" });
 
@@ -49,19 +50,43 @@ exports.join = async (req, res, next) => {
     }
 */
 exports.signIn = (req, res, next) => {
-  console.log("signIn: " + new Date().getTime() + ", email => " + req.body.email);
+  const email = req.user.email;
 
-  const token = signToken(req.body.email);
-  res.status(201).json({
-    message: "로그인 성공",
-    data: {
-      accessToken: {
-        token: token,
-        iat: new Date().getTime(),
-        exp: new Date().setDate(new Date().getDate() + 1)
+  console.log("signIn: " + new Date().getTime() + ", email => " + email);
+  const token = signToken(email);
+  var userInfo;
+
+  try {
+
+    model.User.findOne({ where: {email: email}})
+
+    .then((user) => {
+      userInfo = {
+        email: user.email,
+        name: user.name,
+        name_en: user.name_en,
+        profile_img: user.profile_img,
+        certificatedYn: user.certificatedYn
       }
-    }
-  });
+
+      res.status(201).json({
+        message: "로그인 성공",
+        data: {
+          accessToken: {
+            token: token,
+            iat: new Date().getTime(),
+            exp: new Date().setDate(new Date().getDate() + 1)
+          },
+          userInfo: userInfo
+        }
+      });
+    });
+
+  } catch (err) {
+    res.status(400).json({
+      message: "유저 정보 로드 중 에러 발생"
+    });
+  }
 };
 
 

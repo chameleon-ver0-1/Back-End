@@ -81,6 +81,7 @@ exports.createIssue = (req, res, next) => {
     }
 */
 exports.getAll = (req, res, next) => {
+    //model_mg.Issue.column.findAll({projectId: projectId});
 };
 
 //TODO: 소영 - 코멘트 가져오기
