@@ -1,12 +1,11 @@
-conf_logs = (mongoose) => { return mongoose.model('conf_logs', 
+conf_logs = (mongoose) => { return mongoose.model('conf_log', 
     mongoose.Schema({
-        status: String,
         title : String,
         startTime : Date,
         endTime : Date,
         mainTopics : [String],
-        totalLogFile : String,
-        projectId : { type: mongoose.Schema.Types.ObjectId}, //project의 _id를 말하는건가 
+        totalLogFile : String,//정제되지 않은(전체 회의기록) txt 파일이 있는 경로
+        projectId : { type: mongoose.Schema.Types.ObjectId}, 
         details : [{ type: mongoose.Schema.Types.ObjectId}]
     })
 )};
@@ -14,7 +13,7 @@ conf_logs = (mongoose) => { return mongoose.model('conf_logs',
 conf_log_detail = (mongoose) => { return mongoose.model('conf_log_detail', 
     mongoose.Schema({
         keywords : [String],
-        contents : [String]
+        contents : [String] //주제별 요약된 회의내용
     })
 )};
 

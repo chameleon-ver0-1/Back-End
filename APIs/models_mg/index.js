@@ -19,5 +19,6 @@ db.mongoose = mongoose;
 db.Project = require('./project')(db.mongoose);
 db.Issue = require('./issue')(db.mongoose);
 db.Conf_log = require('./conf_log')(db.mongoose);
+db.Conf_room = require('./conf_room')(db.mongoose);
 
 module.exports = db;
