@@ -6,7 +6,7 @@ require("dotenv").config({
     path: __dirname + "\\" + ".env"
 });
 
-//201 - 성공 / 202 - 실패같은성공
+//201 - 성공 / 202 - 실패같은성공 / 400 - 잘못된 요청
 
 //TODO: 예지 - 프로젝트 개설할때 태그 설정시 존재하는 사용자인지 아닌지 판단
 /*
@@ -22,13 +22,15 @@ exports.emailCheck = (req, res, next) => {
             }
         })
         .then(async (email) => {
+            console.log(email);
+            
             if (!email) {
                 res.status(202).json({
                     message: "존재하지 않는 사용자",
                 });
             } else {
                 if (req.user.email == req.body.email) {
-                    res.status(201).json({
+                    res.status(202).json({
                         message: '본인'
                     });
                 } else {
@@ -48,22 +50,26 @@ exports.emailCheck = (req, res, next) => {
         projectParticipants
     }
 */
-exports.create = (req, res, next) => {
+exports.create = async(req, res, next) => {
+    var projectName;
+    var projectRoles;
+    var projectParticipants;
     try {
-        var projectName = req.body.projectName;
-        var projectRoles = req.body.projectRoles;
-        var projectParticipants = req.body.projectParticipants;
+        projectName = req.body.projectName;
+        projectRoles = req.body.projectRoles;
+        projectParticipants = req.body.projectParticipants;
 
         var projectLeader = req.user.email;
         projectParticipants.push(projectLeader);
-    } catch {
+    } catch(err) {
+        console.log(err);
         res.status(400).send('Please check Params');
     }
 
     // FIXME: 중복된 프로젝트명인지 확인
     // -> 나중에 다른 API로 뺄 것(프젝이름 입력 종료하면, 지후가 그 API 호출해서
     // 옆에 빨간글씨로 "*중복된 프로젝트명입니다."")
-    model.ProjectUser.findOne({
+    await model.ProjectUser.findOne({
         where: { projectName: projectName }
     }).then((project) => {
         if (project) {
@@ -77,11 +83,11 @@ exports.create = (req, res, next) => {
 
     // 프로젝트 참여자 먼저 추가
     var isAdminYn;
-    projectParticipants.forEach(participant => {
+    await projectParticipants.forEach(participant => {
         if (participant === projectLeader) {
-            isAdminYn = 'Y'
+            isAdminYn = 'Y';
         } else {
-            isAdminYn = 'N'
+            isAdminYn = 'N';
         }
 
         model.ProjectUser.create({
@@ -97,11 +103,13 @@ exports.create = (req, res, next) => {
         });
     });
 
+    var result;
     // 프로젝트 생성 후 이슈 columns 생성
-    model_mg.Project.create({
+    await model_mg.Project.create({
         name: projectName,
         roles: projectRoles
     }).then((project) => {
+        result = project;
         var statusList = ["TODO", "DOING", "DONE"]
 
         statusList.forEach(status => {
@@ -114,13 +122,17 @@ exports.create = (req, res, next) => {
                     res.status(202).send('Cannot create Issue columns');
 
                 console.log(column);
+            }).catch((err) =>{
+                console.log(err);
             });
         });
+    }).catch((err) =>{
+        console.log(err);
     });
 
-    res.status(200).json({
+    await res.status(201).json({
         message: '프로젝트 생성 성공',
-        data: false
+        data: result
     });
 };
 
