@@ -7,8 +7,8 @@ const passportConf = require('../common/passport');
 const passportJWT = passport.authenticate('jwt', { session: false });
 
 /* ROUTING METHOD */
-router.post('/create/task', controller.createIssue); // FIXME:
-//router.get('/get', controller.getList);
+router.post('/create/task', passportJWT,controller.createIssue); // FIXME:
+router.post('/get', controller.getAll);
 router.get('/get/:id', controller.getComments); // FIXME:
 //router.post('/delete/:id', passportJWT, controller.deleteTask);
 

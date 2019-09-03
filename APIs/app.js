@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-//const cors = require('cors');
+// const cors = require('cors');
 
 require('dotenv').config({path: __dirname + '\\' + '.env'});
 
@@ -11,7 +11,7 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended : true }));
 // app.use(cors({ origin: 'https://www.chameleon4switch.cf' }));
-//app.use(cors());
+// sapp.use(cors());
 
 // use database with sequelize
 sequelize.sync();
