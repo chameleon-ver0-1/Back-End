@@ -13,7 +13,7 @@ mongodb.on('error', console.error);
 mongodb.once('open', function(){
     console.log("Connected to mongodb server");
 });
-mongoose.connect('mongodb://localhost/develop');
+mongoose.connect('mongodb://localhost/develop', {useNewUrlParser : true});
 
 db.mongoose = mongoose;
 db.Project = require('./project')(db.mongoose);
