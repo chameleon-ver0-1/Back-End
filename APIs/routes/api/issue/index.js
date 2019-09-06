@@ -7,12 +7,14 @@ const passportConf = require('../common/passport');
 const passportJWT = passport.authenticate('jwt', { session: false });
 
 /* ROUTING METHOD */
-router.post('/create/task', passportJWT,controller.createIssue); // FIXME:
-//router.get('/get', controller.getList);
-router.get('/get/:id',passportJWT, controller.getComments); // FIXME:
-//router.post('/delete/:id', passportJWT, controller.deleteTask);
+router.post('/create/task', passportJWT,controller.createIssue);
+router.post('/get', passportJWT, controller.getAll);
+
+router.post('/delete', passportJWT, controller.deleteTask);
+router.post('/changestatus', passportJWT, controller.changeStatus);
 
 // comment
-router.post('/create/comment',passportJWT, controller.createComment); // FIXME:
+router.get('/get/:id', passportJWT, controller.getComments);
+router.post('/create/comment', passportJWT, controller.createComment);
 
 module.exports = router;
