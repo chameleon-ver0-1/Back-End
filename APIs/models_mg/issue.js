@@ -17,7 +17,7 @@ issue_task = (mongoose) => { return mongoose.model('task',
         writerName: String,
         writerNameEn: String,
         writerImg: String,
-        comentIds: [{type: mongoose.Schema.Types.ObjectId, ref: 'comment'}]
+        commentIds: [{type: mongoose.Schema.Types.ObjectId, ref: 'comment'}]
     })
 )};
 

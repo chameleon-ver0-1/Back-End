@@ -2,10 +2,9 @@ const model = require('../../../models');
 const model_mg = require('../../../models_mg');
 require("dotenv").config({ path: __dirname + "\\" + ".env" });
 
-//201 - 성공 / 202 - 실패같은성공
 
-//TODO: 소영 -> 이슈 생성
 /*
+    ****< 이슈 생성 >****
     post /api/issue/create
     {
         projectId,
@@ -77,100 +76,202 @@ exports.createIssue = async (req, res, next) => {
         });
     });
 };
-//TODO: 소영 - 이슈 전체 가져오기
+
 /*
+    ****< 이슈 조회 >****
     GET /api/issue/get
     {
-        projectName
+        projectId
     }
 */
 exports.getAll = async (req, res, next) => {
-    var data;
-    var taskData = {};
-    var columnData = {};
-    var projectId;
+    var projectRoles;
 
-    await model_mg.Project.findOne(
-        { name: req.body.projectName }
-    ).then((project) => {
-        if (!project) {
+    try {
+        var projectId = req.body.projectId;
+        var columnData = {};
+        var taskData = {};
+    } catch (err) {
+        res.status(204).json({
+            message: 'Please check Params',
+            data: false
+        });
+    }
+
+    // 프로젝트 역할 조회
+    await model_mg.Project.findById(projectId, (err, project) => {
+        if (err) {
             res.status(202).json({
-                message: "존재하지 않는 프로젝트명",
+                message: "프로젝트 역할 조회 중 에러 발생",
                 data: false
             });
         }
 
-        projectId = project._id;
+        projectRoles = project.roles;
     });
 
     // 해당 프로젝트 각 칼럼 데이터 가져오기
-    var status = ["TODO", "DOING", "DONE"];
-
-    await status.forEach(status => {
-        model_mg.Issue.column.findOne(
-            { projectId: projectId }
-        ).then((column) => {
-            if (!column) {
-                res.status(202).json({
-                    message: "프로젝트 컬럼 생성되지 않음",
-                    data: false
-                });
-            }
-
-            console.log(column);
-
-            columnData[status] = {
-                _id: column._id
-            };
-        }).catch((err) => {
-            res.status(400).json({
-                message: "DB 쿼리 수행 중 에러",
+    await model_mg.Issue.column.find({
+        projectId: projectId
+    }).populate('taskIds').then((columns) => {
+        if (!columns) {
+            res.status(404).json({
+                message: "칼럼 가져오기 실패",
                 data: false
             });
+        }
+
+        res.status(200).json({
+            message: "이슈 조회 성공",
+            data: {
+                deptData: projectRoles,
+                issueData: columns
+            }
         });
     });
-
-    res.status(200).json({
-        data: columnData
-    });
-    
 };
 
-//TODO: 소영 - 코멘트 가져오기
+/* 
+    ****< 이슈 삭제 >****
+    POST /api/issue/delete
+    {
+        taskId,
+        statusId
+    }
+*/
+exports.deleteTask = async (req, res, next) => {
+    try {
+        var taskId = req.body.taskId;
+        var statusId = req.body.statusId;
+    } catch (err) {
+        res.status(204).json({
+            message: "Please check Params",
+            data: false
+        });
+    }
+
+    await model_mg.Issue.column.update(
+        { _id: statusId },
+        { $pull : { taskIds: taskId }}
+    ).then((result) => {
+        if (!result) {
+            res.status(200).json({
+                message: '칼럼에서 이슈 삭제 실패',
+                data: false
+            });
+        }
+    });
+
+    await model_mg.issue.task.remove({ _id: taskId }, (err, result) => {
+        if (!result) {
+            res.status(202).json({
+                message: '이슈 데이터 삭제 실패',
+                data: false
+            });
+        }
+
+        if (err) {
+            res.status(400).json({
+                message: '이슈 데이터 삭제 중 DB 오류',
+                data: false
+            });
+        }
+
+        res.status(200).json({
+            message: '이슈 삭제 성공',
+            data: false
+        });
+    });
+}
+
+/* 
+    ****< 이슈 상태 변경 >****
+    POST /api/issue/changestatus
+    {
+        taskId,
+        exStatusId,
+        newStatusId
+    }
+*/
+exports.changeStatus = async (req, res, next) => {
+    try {
+        var taskId = req.body.taskId;
+        var exStatusId = req.body.exStatusId;
+        var newStatusId = req.body.newStatusId;
+    } catch (err) {
+        res.status(204).json({
+            message: "Please check Params",
+            data: false
+        });
+    }
+
+    // 이전 상태에서 제거
+    await model_mg.Issue.column.update(
+        { _id: exStatusId },
+        { $pull: { taskIds: taskId }}
+    ).then((result) => {
+        if (!result) {
+            res.status(200).json({
+                message: '이슈 상태변경 실패',
+                data: false
+            });
+        }
+    });
+
+    // 새로운 상태로 업데이트
+    await model_mg.Issue.column.update(
+        { _id: newStatusId },
+        { $push: { taskIds: taskId }}
+    ).then((result) => {
+        if (!result) {
+            res.status(200).json({
+                message: '이슈 상태변경 실패',
+                data: false
+            });
+        }
+
+        res.status(200).json({
+            message: '이슈 상태변경 성공',
+            data: false
+        });
+    });
+};
+
 /*
+    ****< 댓글 조회 >****
     GET /api/issue/get/:id
 */
 exports.getComments = async (req, res, next) => {
     var commentList = [];
 
-    // TODO: TEST IN POSTMAN
     await model_mg.Issue.task.findById(req.params.id)
-    .then((task) => {
-        if (!task) {
-            res.status(204).send('Issue not exists');
+    .populate('commentIds')
+    .exec((err, data) => {
+        if (err) {
+            res.status(400).json({
+                message: "DB 쿼리 수행 중 에러",
+                data: false
+            })
         }
 
-        task.commentIds.forEach(commentId => {
-            model_mg.Issue.comment.findById(commentId)
-            .then((comment) => {
-                if (!comment) {
-                    res.status(204).send('Some comments not exist');
-                }
-
-                commentList.push(comment);
-
-                console.log('commentList => ' + comment);
+        if (!data) {
+            res.status(204).json({
+                message: "존재하지 않는 이슈",
+                data: false
             });
-        });
-    });
+        }
 
-    res.status(200).json({
-        message: '댓글 리스트 조회 성공',
-        data: commentList
+        res.status(200).json({
+            message: "댓글 조회 성공",
+            data: data.commentIds
+        })
+
+        console.log(data);
     });
 };
-// TODO: 댓글 작성하기
+
 /*
+    ****< 댓글 생성 >****
     POST /api/issue/comment
     {
         taskId,
@@ -198,9 +299,10 @@ exports.createComment = async (req, res, next) => {
     
     // 댓글 생성
     await model_mg.Issue.comment.create({
-        username: username,
-        usernameEn: usernameEn,
-        userImg: userImg,
+        email: req.user.email,
+        name: username,
+        name_en: usernameEn,
+        profileImg: userImg,
         content: content
     })
     .then((comment) => {
@@ -210,12 +312,13 @@ exports.createComment = async (req, res, next) => {
             });
         }
 
+        console.log("comment_id ====> " + comment._id);
         commentData = comment;
     });
 
-    await model_mg.Issue.task.findOneAndUpdate(
+    await model_mg.Issue.task.update(
         { _id: taskId },
-        { $push: { commentIds: commentId }}
+        { $push: { commentIds: commentData._id }}
     ).then((result) => {
         res.status(200).json({
             message: '댓글 생성 성공',
