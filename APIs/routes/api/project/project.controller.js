@@ -20,8 +20,7 @@ exports.participantCheck = (req, res, next) => {
             where: {
                 email: req.body.email
             }
-        })
-        .then(async (email) => {
+        }).then(async (email) => {
             console.log(email);
 
             if (!email) {
@@ -39,6 +38,10 @@ exports.participantCheck = (req, res, next) => {
                     });
                 }
             }
+        }).catch((err)=>{
+            res.status(500).json({
+                message: '서버 오류'
+            });
         });
 };
 //TODO: 예지 - 프로젝트 생성
@@ -63,7 +66,9 @@ exports.create = async (req, res, next) => {
         projectParticipants.push(projectLeader);
     } catch (err) {
         console.log(err);
-        res.status(400).send('Please check Params');
+        res.status(400).json({
+            message: 'Please check Params'
+        });
     }
 
     // FIXME: 중복된 프로젝트명인지 확인
@@ -80,7 +85,11 @@ exports.create = async (req, res, next) => {
             });
         }
     }).catch((err) => {
-        res.status(400).send('DB Error');
+        console.log(err);
+        
+        res.status(500).json({
+            message: '서버 오류'
+        });
     });
 
     // 프로젝트 참여자 먼저 추가
@@ -102,6 +111,9 @@ exports.create = async (req, res, next) => {
             console.log(result);
         }).catch((err) => {
             console.log(err);
+            res.status(500).json({
+                message: '서버 오류'
+            });
         });
     });
 
@@ -121,15 +133,23 @@ exports.create = async (req, res, next) => {
                 projectId: project.id
             }).then((column) => {
                 if (!column)
-                    res.status(202).send('Cannot create Issue columns');
+                    res.status(202).json({
+                        message: '이슈 컬럼 생성 오류'
+                    });
 
                 console.log(column);
             }).catch((err) => {
                 console.log(err);
+                res.status(500).json({
+                    message: '서버 오류'
+                });
             });
         });
     }).catch((err) => {
         console.log(err);
+        res.status(500).json({
+            message: '서버 오류'
+        });
     });
 
     await res.status(201).json({
@@ -182,6 +202,9 @@ exports.list = async (req, res, next) => {
                 }
             }).catch((err) => {
                 console.log(err);
+                res.status(500).json({
+                    message: '서버 오류'
+                });
             });
         });
     });
@@ -199,7 +222,9 @@ exports.roleList = async (req, res, next) => {
         projectId = req.body.projectId;
     } catch (err) {
         console.log(err);
-        res.status(400).send('Please check Params');
+        res.status(400).json({
+            message: 'Please check Params'
+        });
     }
     model_mg.Project.findOne({
         _id: projectId
@@ -219,6 +244,9 @@ exports.roleList = async (req, res, next) => {
         }
     }).catch((err) => {
         console.log(err);
+        res.status(500).json({
+            message: '서버 오류'
+        });
     });
 };
 
@@ -234,11 +262,13 @@ exports.firstCheck = async (req, res, next) => {
         projectId = req.body.projectId;
     } catch (err) {
         console.log(err);
-        res.status(400).send('Please check Params');
+        res.status(400).json({
+            message: 'Please check Params'
+        });
     }
     //TODO: model_mg.project에서 projectRoles 배열이 null인지 확인 -> null이면 역할지정 없음(개설자가 역할 설정하지 않았으므로)
     model_mg.Project.findOne({
-
+        projectId : projectId
     }).then((result) => {
         if (result.roles === null) {
             //이슈 넘김
@@ -254,7 +284,7 @@ exports.firstCheck = async (req, res, next) => {
                     email: req.user.email
                 }
             }).then((result) => {
-                console.log(result.projectRole);
+                var projectRole=result.projectRole;
                 //TODO: 사용자의 역할이 null이면, model_mg.project에서 불러온 projectRoles 중 어떤 역할인지 선택 -> project_users role필드에 넣어줌
                 if (result.projectRole === null) {
                     var projectLeader = {};
@@ -310,35 +340,47 @@ exports.firstCheck = async (req, res, next) => {
                                         }
                                     }).catch((err) => {
                                         console.log(err);
-                                        res.status(500).send('서버 오류');
+                                        res.status(500).json({
+                                            message: '서버 오류'
+                                        });
                                     });
                                 });
                             }).catch((err) => {
                                 console.log(err);
-                                res.status(500).send('서버 오류');
+                                res.status(500).json({
+                                    message: '서버 오류'
+                                });
                             });
                         } else {
-                            res.status(400).send('DB Error');
+                            res.status(400).json({
+                                message: 'DB Error'
+                            });
                         }
                     }).catch((err) => {
                         console.log(err);
-                        res.status(500).send('서버 오류');
+                        res.status(500).json({
+                            message: '서버 오류'
+                        });
                     });
                 } else {
                     res.status(201).json({
                         message: '역할있는 사용자',
-                        data: result.projectRole
+                        data: projectRole
                     });
                 }
 
             }).catch((err) => {
                 console.log(err);
-                res.status(500).send('서버 오류');
+                res.status(500).json({
+                    message: '서버 오류'
+                });
             });
         }
     }).catch((err) => {
         console.log(err);
-        res.status(500).send('서버 오류');
+        res.status(500).json({
+            message: '서버 오류'
+        });
     });
 };
 
@@ -357,7 +399,9 @@ exports.participate = async (req, res, next) => {
         projectId = req.body.projectId;
     } catch (err) {
         console.log(err);
-        res.status(400).send('Please check Params');
+        res.status(400).json({
+            message: 'Please check Params'
+        });
     }
     model_mg.Project.findOne({
         _id: projectId
@@ -389,7 +433,9 @@ exports.participate = async (req, res, next) => {
 
     }).catch((err) => {
         console.log(err);
-        res.status(500).send('서버 오류');
+        res.status(500).json({
+            message: '서버 오류'
+        });
     });
 };
 
@@ -407,7 +453,9 @@ exports.refuse = async (req, res, next) => {
         userEmail = req.user.email;
     } catch (err) {
         console.log(err);
-        res.status(400).send('Please check Params');
+        res.status(400).json({
+            message: 'Please check Params'
+        });
     }
     model.ProjectUser.destroy({
         where: {
@@ -427,6 +475,8 @@ exports.refuse = async (req, res, next) => {
         }
     }).catch(err => {
         console.error(err);
-        res.status(500).send('서버 오류');
+        res.status(500).json({
+            message: '서버 오류'
+        });
     });
 }

@@ -9,6 +9,7 @@ require("dotenv").config({
 /*
     post /api/conf_room/create
     {
+        projectId
         title
         mainTopics
         startTime(날짜 +시간 )
@@ -17,22 +18,21 @@ require("dotenv").config({
 */
 exports.create = (req, res, next) => {
     //id 제외 총 7개 속성 갖고있음
-    var title;
-    var mainTopics;
-    var members;
-    var startTime;
-    var organizerEmail;
-    var organName;
-    var organNameEn;
+    var title; //방 제목
+    var mainTopics; //메인 토픽 
+    var members; // 참여자
+    var startTime; // 시작 시간
+    var organizerEmail; //회의 개설자 이메일
+    var organName; // 회의 개설자 이름
+    var organNameEn; // 회의 개설자 영어이름
     var projectName; //FIXME: 중간 URL로 받아온 프로젝트이름 적기
     var projectId;
     try {
+        projectId = req.body.projectId;
         title = req.body.title;
         mainTopics = req.body.mainTopics;
         members = req.body.members;
         startTime = req.body.startTime;
-        //projectId 받아야함 --> 중간에 URL에 프로젝트 이름이 생길 예정
-
         organizerEmail = req.user.email; 
     } catch(err) {
         console.log(err);
