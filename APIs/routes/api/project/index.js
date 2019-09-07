@@ -12,4 +12,6 @@ router.post('/participantCheck', passportJWT, controller.participantCheck);
 router.get('/list', passportJWT, controller.list);
 router.post('/roleList', passportJWT, controller.roleList);
 router.post('/firstCheck', passportJWT, controller.firstCheck);
+router.post('/participate', passportJWT, controller.participate);
+router.post('/refuse', passportJWT, controller.refuse);
 module.exports = router;
