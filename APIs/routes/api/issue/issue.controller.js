@@ -106,7 +106,8 @@ exports.getAll = async (req, res, next) => {
                 data: false
             });
         }
-
+        console.log(project);
+        
         projectRoles = project.roles;
     });
 
