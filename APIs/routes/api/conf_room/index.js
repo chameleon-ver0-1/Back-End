@@ -7,8 +7,10 @@ const passportConf = require('../common/passport');
 const passportJWT = passport.authenticate('jwt', { session: false });
 
 /* ROUTING METHOD */
-//TODO: 회의실 개설
+//회의실 개설
 router.post('/create', passportJWT, controller.create);
+//회의 참여자 체크
+router.post('/memberCheck', passportJWT, controller.memberCheck);
 //TODO: 현재 진행 중인 회의 목록
 router.get('/proceedList', passportJWT, controller.proceedList);
 //TODO: 내가 포함된 회의 목록

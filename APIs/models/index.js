@@ -14,5 +14,6 @@ db.Sequelize = Sequelize;
 
 db.User = require('./user')(sequelize, Sequelize);
 db.ProjectUser = require('./project_user')(sequelize, Sequelize);
+db.ConftUser = require('./conf_user')(sequelize, Sequelize);
 
 module.exports = db;

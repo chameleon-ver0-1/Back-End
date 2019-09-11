@@ -26,21 +26,25 @@ exports.participantCheck = (req, res, next) => {
             if (!email) {
                 res.status(202).json({
                     message: "존재하지 않는 사용자",
+                    data: false
                 });
             } else {
                 if (req.user.email == req.body.email) {
                     res.status(202).json({
-                        message: '본인'
+                        message: '본인',
+                        data: false
                     });
                 } else {
                     res.status(201).json({
-                        message: '존재하는 사용자'
+                        message: '존재하는 사용자',
+                        data: true
                     });
                 }
             }
         }).catch((err)=>{
             res.status(500).json({
-                message: '서버 오류'
+                message: '서버 오류',
+                data: false
             });
         });
 };
@@ -67,7 +71,8 @@ exports.create = async (req, res, next) => {
     } catch (err) {
         console.log(err);
         res.status(400).json({
-            message: 'Please check Params'
+            message: 'Please check Params',
+            data: false
         });
     }
 
@@ -81,14 +86,16 @@ exports.create = async (req, res, next) => {
     }).then((project) => {
         if (project) {
             res.status(202).json({
-                message: '중복된 프로젝트명'
+                message: '중복된 프로젝트명',
+                data: false
             });
         }
     }).catch((err) => {
         console.log(err);
         
         res.status(500).json({
-            message: '서버 오류'
+            message: '서버 오류',
+            data: false
         });
     });
 
@@ -112,7 +119,8 @@ exports.create = async (req, res, next) => {
         }).catch((err) => {
             console.log(err);
             res.status(500).json({
-                message: '서버 오류'
+                message: '서버 오류',
+                data: false
             });
         });
     });
@@ -134,21 +142,24 @@ exports.create = async (req, res, next) => {
             }).then((column) => {
                 if (!column)
                     res.status(202).json({
-                        message: '이슈 컬럼 생성 오류'
+                        message: '이슈 컬럼 생성 오류',
+                        data : false
                     });
 
                 console.log(column);
             }).catch((err) => {
                 console.log(err);
                 res.status(500).json({
-                    message: '서버 오류'
+                    message: '서버 오류',
+                    data : false
                 });
             });
         });
     }).catch((err) => {
         console.log(err);
         res.status(500).json({
-            message: '서버 오류'
+            message: '서버 오류',
+            data : false
         });
     });
 
@@ -203,7 +214,8 @@ exports.list = async (req, res, next) => {
             }).catch((err) => {
                 console.log(err);
                 res.status(500).json({
-                    message: '서버 오류'
+                    message: '서버 오류',
+                    data : false
                 });
             });
         });
@@ -223,7 +235,8 @@ exports.roleList = async (req, res, next) => {
     } catch (err) {
         console.log(err);
         res.status(400).json({
-            message: 'Please check Params'
+            message: 'Please check Params',
+            data : false
         });
     }
     model_mg.Project.findOne({
@@ -245,7 +258,8 @@ exports.roleList = async (req, res, next) => {
     }).catch((err) => {
         console.log(err);
         res.status(500).json({
-            message: '서버 오류'
+            message: '서버 오류',
+            data : false
         });
     });
 };
@@ -263,12 +277,13 @@ exports.firstCheck = async (req, res, next) => {
     } catch (err) {
         console.log(err);
         res.status(400).json({
-            message: 'Please check Params'
+            message: 'Please check Params',
+            data : false
         });
     }
     //TODO: model_mg.project에서 projectRoles 배열이 null인지 확인 -> null이면 역할지정 없음(개설자가 역할 설정하지 않았으므로)
     model_mg.Project.findOne({
-        projectId : projectId
+        _id : projectId
     }).then((result) => {
         if (result.roles === null) {
             //이슈 넘김
@@ -372,14 +387,16 @@ exports.firstCheck = async (req, res, next) => {
             }).catch((err) => {
                 console.log(err);
                 res.status(500).json({
-                    message: '서버 오류'
+                    message: '서버 오류',
+                    data : false
                 });
             });
         }
     }).catch((err) => {
         console.log(err);
         res.status(500).json({
-            message: '서버 오류'
+            message: '서버 오류',
+            data : false
         });
     });
 };
@@ -400,7 +417,8 @@ exports.participate = async (req, res, next) => {
     } catch (err) {
         console.log(err);
         res.status(400).json({
-            message: 'Please check Params'
+            message: 'Please check Params',
+            data : false
         });
     }
     model_mg.Project.findOne({
@@ -434,7 +452,8 @@ exports.participate = async (req, res, next) => {
     }).catch((err) => {
         console.log(err);
         res.status(500).json({
-            message: '서버 오류'
+            message: '서버 오류',
+            data : false
         });
     });
 };
@@ -454,7 +473,8 @@ exports.refuse = async (req, res, next) => {
     } catch (err) {
         console.log(err);
         res.status(400).json({
-            message: 'Please check Params'
+            message: 'Please check Params',
+            data : false
         });
     }
     model.ProjectUser.destroy({
@@ -476,7 +496,8 @@ exports.refuse = async (req, res, next) => {
     }).catch(err => {
         console.error(err);
         res.status(500).json({
-            message: '서버 오류'
+            message: '서버 오류',
+            data : false
         });
     });
 }
