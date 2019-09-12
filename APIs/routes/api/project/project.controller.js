@@ -272,6 +272,7 @@ exports.roleList = async (req, res, next) => {
 */
 exports.firstCheck = async (req, res, next) => {
     var projectId;
+    var projectName;
     try {
         projectId = req.body.projectId;
     } catch (err) {
@@ -285,6 +286,9 @@ exports.firstCheck = async (req, res, next) => {
     model_mg.Project.findOne({
         _id : projectId
     }).then((result) => {
+        if(result){
+            projectName = result.name;
+        }
         if (result.roles === null) {
             //이슈 넘김
             res.status(201).json({
@@ -296,12 +300,13 @@ exports.firstCheck = async (req, res, next) => {
             //TODO: projectRoles배열이 null이 아니면, model.project_users에서 사용자의 역할이 null인지 확인
             model.ProjectUser.findOne({
                 where: {
+                    projectName : projectName,
                     email: req.user.email
                 }
             }).then((result) => {
                 var projectRole=result.projectRole;
                 //TODO: 사용자의 역할이 null이면, model_mg.project에서 불러온 projectRoles 중 어떤 역할인지 선택 -> project_users role필드에 넣어줌
-                if (result.projectRole === null) {
+                if (projectRole === null) {
                     var projectLeader = {};
                     var projectParticipants = [];
                     var projectRoles;
@@ -356,31 +361,35 @@ exports.firstCheck = async (req, res, next) => {
                                     }).catch((err) => {
                                         console.log(err);
                                         res.status(500).json({
-                                            message: '서버 오류'
+                                            message: '서버 오류',
+                                            data: false
                                         });
                                     });
                                 });
                             }).catch((err) => {
                                 console.log(err);
                                 res.status(500).json({
-                                    message: '서버 오류'
+                                    message: '서버 오류',
+                                    data: false
                                 });
                             });
                         } else {
                             res.status(400).json({
-                                message: 'DB Error'
+                                message: 'DB Error',
+                                data: false
                             });
                         }
                     }).catch((err) => {
                         console.log(err);
                         res.status(500).json({
-                            message: '서버 오류'
+                            message: '서버 오류',
+                            data: false
                         });
                     });
                 } else {
                     res.status(201).json({
                         message: '역할있는 사용자',
-                        data: projectRole
+                        data: false
                     });
                 }
 

@@ -145,8 +145,9 @@ exports.create = (req, res, next) => {
         userName
     }
 */
-exports.memberCheck = (req, res, next) => {
+exports.memberCheck = async(req, res, next) => {
     var projectId;
+    var projectName;
     var userName;
     var organizerEmail;
     //유저 
@@ -164,38 +165,58 @@ exports.memberCheck = (req, res, next) => {
             data : false 
         });
     }
+    await model_mg.Project.findOne({
+        _id : projectId
+    }).then((result)=>{
+        projectName = result.name;
+    }).catch((err)=>{
+        console.log(err);
+        res.status(500).json({
+            message: '서버 오류',
+            data : false
+        });
+    });
 
-    model.User.findAll({
+    await model.User.findAll({
         where: {
             name: userName
         }
     }).then((result) => {
-        // console.log(result.length);
+        console.log(result.length);
         var total = result.length;
         var i = 0;
         result.forEach((data) => {
-            // console.log(data);
+            console.log(data.email);
             
             if (data.email === organizerEmail) {
-                //그냥 빈게 정상임
+                // console.log(organizerEmail);
+                
+                i=i+1;
             } else {
                 user.email = data.email;
-                model.Project_user.findOne({
+                model.ProjectUser.findOne({
                     where : {
+                        projectName : projectName,
                         email : data.email
                     }
                 }).then((result)=>{
-                    console.log(result);
                     
                     i = i + 1;
+                    // 프로젝트에 있지않은 사용자&프로젝트에있지만 본인&프로젝트에있지만 본인아닌사용자
+                    //프로젝트에 있냐없냐는 project_user에 부서설정이 되어있냐 없냐로 구분 
                     if(result){
+                        console.log(user.email); //이 값이 안받아와진다. 당연한것 다른 사용자는 부서를 선택하지 않았고 동명이인이지만 프로젝트에도 포함되어있지않음.
                         user.role = result.projectRole;
                         searchList.push(user);
                     }
-                    else{
-                        res.status(202).json({
-                            message: '검색 결과 불러오기 실패',
-                            data : false
+                    //if가 비동기로 처리되어 data에 아무것도있지 않음.
+                    if(i===total){
+                        res.status(201).json({
+                            message: '검색 결과',
+                            data: {
+                                email : searchList.email,
+                                role : searchList.role
+                            }
                         });
                     }
                 }).catch((err)=>{
@@ -207,17 +228,6 @@ exports.memberCheck = (req, res, next) => {
                 });
             }
         });
-        // console.log(i);
-        
-        if(i===total){
-            res.status(201).json({
-                message: '검색 결과',
-                data: {
-                    email : searchList.email,
-                    role : searchList.role
-                }
-            });
-        }
     }).catch((err) => {
         console.log(err);
         res.status(500).json({
