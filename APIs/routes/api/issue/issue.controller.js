@@ -79,18 +79,14 @@ exports.createIssue = async (req, res, next) => {
 
 /*
     ****< 이슈 조회 >****
-    GET /api/issue/get
-    {
-        projectId
-    }
+    GET /api/issue/:projectId
 */
-exports.getAll = async (req, res, next) => {
-    var projectRoles;
-
+exports.getList = async (req, res, next) => {
     try {
-        var projectId = req.body.projectId;
-        var columnData = {};
+        var projectId = req.params.projectId;
+        var roleData = new Array();
         var taskData = {};
+        var columnData = {};
     } catch (err) {
         res.status(204).json({
             message: 'Please check Params',
@@ -102,18 +98,40 @@ exports.getAll = async (req, res, next) => {
     await model_mg.Project.findById(projectId, (err, project) => {
         if (err) {
             res.status(202).json({
-                message: "프로젝트 역할 조회 중 에러 발생",
+                message: "역할 조회 중 에러 발생",
                 data: false
             });
         }
 
-        projectRoles = project.roles;
+        project.roles.forEach(role => {
+            roleData.push({ 'role': role });
+        });
     });
 
-    // 해당 프로젝트 각 칼럼 데이터 가져오기
-    await model_mg.Issue.column.find({
-        projectId: projectId
-    }).populate('taskIds').then((columns) => {
+    // 해당 프로젝트 각 task 데이터 가져오기
+    await model_mg.Issue.column.find(
+        { projectId: projectId }
+    ).populate('taskIds').then((columns) => {
+        if (!columns) {
+            res.status(404).json({
+                message: "task 정보 가져오기 실패",
+                data: false
+            });
+        }
+
+        console.log(columns);
+
+        columns.forEach(column => {
+            column.taskIds.forEach(task => {
+                taskData[task._id] = task;
+            });
+        });
+    });
+
+    // 해당 프로젝트 각 column 테이터 가져오기
+    await model_mg.Issue.column.find(
+        { projectId: projectId }
+    ).then((columns) => {
         if (!columns) {
             res.status(404).json({
                 message: "칼럼 가져오기 실패",
@@ -121,11 +139,16 @@ exports.getAll = async (req, res, next) => {
             });
         }
 
+        columns.forEach(column => {
+            columnData[column.status] = column;
+        });
+
         res.status(200).json({
             message: "이슈 조회 성공",
             data: {
-                deptData: projectRoles,
-                issueData: columns
+                roleData:roleData,
+                taskData:taskData,
+                columnData: columnData
             }
         });
     });
