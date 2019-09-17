@@ -8,7 +8,7 @@ require("dotenv").config({
 
 //201 - 성공 / 202 - 실패같은성공 / 400 - 잘못된 요청
 
-//TODO: 예지 - 프로젝트 개설할때 태그 설정시 존재하는 사용자인지 아닌지 판단
+//프로젝트 개설할때 태그 설정시 존재하는 사용자인지 아닌지 판단
 /*
     post /api/project/emailCheck
     {
@@ -48,7 +48,7 @@ exports.participantCheck = (req, res, next) => {
             });
         });
 };
-//TODO: 예지 - 프로젝트 생성
+//프로젝트 생성
 /*
     POST /api/project/create
     {
@@ -169,7 +169,7 @@ exports.create = async (req, res, next) => {
     });
 };
 
-//TODO: 예지 - 참여중인 프로젝트 목록
+//참여중인 프로젝트 목록
 /*
     GET /api/project/list
     {
@@ -223,15 +223,15 @@ exports.list = async (req, res, next) => {
 };
 
 /*
-    POST /api/project/list
+    GET /api/project/roleList/:projectId
     {
-        projectId
     }
 */
 exports.roleList = async (req, res, next) => {
     var projectId;
+    var roles=[];
     try {
-        projectId = req.body.projectId;
+        projectId = req.params.projectId;
     } catch (err) {
         console.log(err);
         res.status(400).json({
@@ -242,12 +242,18 @@ exports.roleList = async (req, res, next) => {
     model_mg.Project.findOne({
         _id: projectId
     }).then((result) => {
-        console.log(result);
-
+        // console.log(result.roles.length);
+        result.roles.forEach((role) => {
+            var roleObject={};
+            roleObject.role = role;
+            roles.push(roleObject);
+        });
+        
+        // role.role = result.roles[0];
         if (result) {
             res.status(201).json({
                 message: '목록 가져오기 성공',
-                data: result.roles
+                data: roles //TODO: 부서목록이 배열말고 role : "" 객체로 만들어서 보내야하나..
             });
         } else {
             res.status(202).json({
@@ -265,16 +271,16 @@ exports.roleList = async (req, res, next) => {
 };
 
 /*
-    POST /api/project/firstCheck
+    GET /api/project/firstCheck/:projectId
     {
-        projectId
+        
     }
 */
 exports.firstCheck = async (req, res, next) => {
     var projectId;
     var projectName;
     try {
-        projectId = req.body.projectId;
+        projectId = req.params.projectId;
     } catch (err) {
         console.log(err);
         res.status(400).json({
@@ -282,7 +288,7 @@ exports.firstCheck = async (req, res, next) => {
             data : false
         });
     }
-    //TODO: model_mg.project에서 projectRoles 배열이 null인지 확인 -> null이면 역할지정 없음(개설자가 역할 설정하지 않았으므로)
+    //model_mg.project에서 projectRoles 배열이 null인지 확인 -> null이면 역할지정 없음(개설자가 역할 설정하지 않았으므로)
     model_mg.Project.findOne({
         _id : projectId
     }).then((result) => {
@@ -297,7 +303,7 @@ exports.firstCheck = async (req, res, next) => {
             });
         } else {
             //창 떠야하는 시점
-            //TODO: projectRoles배열이 null이 아니면, model.project_users에서 사용자의 역할이 null인지 확인
+            //projectRoles배열이 null이 아니면, model.project_users에서 사용자의 역할이 null인지 확인
             model.ProjectUser.findOne({
                 where: {
                     projectName : projectName,
@@ -305,7 +311,7 @@ exports.firstCheck = async (req, res, next) => {
                 }
             }).then((result) => {
                 var projectRole=result.projectRole;
-                //TODO: 사용자의 역할이 null이면, model_mg.project에서 불러온 projectRoles 중 어떤 역할인지 선택 -> project_users role필드에 넣어줌
+                //사용자의 역할이 null이면, model_mg.project에서 불러온 projectRoles 중 어떤 역할인지 선택 -> project_users role필드에 넣어줌
                 if (projectRole === null) {
                     var projectLeader = {};
                     var projectParticipants = [];
@@ -411,18 +417,16 @@ exports.firstCheck = async (req, res, next) => {
 };
 
 /*
-    POST /api/project/participate
+    POST /api/project/participate/:projectId
     {
-        projectId,
         role
     }
 */
 exports.participate = async (req, res, next) => {
     var projectId;
     var projectName;
-    var role;
     try {
-        projectId = req.body.projectId;
+        projectId = req.params.projectId;
     } catch (err) {
         console.log(err);
         res.status(400).json({
@@ -468,16 +472,15 @@ exports.participate = async (req, res, next) => {
 };
 
 /*
-    POST /api/project/refuse
+    GET /api/project/refuse
     {
-        projectId
     }
 */
 exports.refuse = async (req, res, next) => {
     var projectId;
     var userEmail;
     try {
-        projectId = req.body.projectId;
+        projectId = req.params.projectId;
         userEmail = req.user.email;
     } catch (err) {
         console.log(err);

@@ -9,6 +9,7 @@ require("dotenv").config({
 /*
     get /api/conf_log/list
     {
+        
     }
 */
 exports.list = (req, res, next) => {
