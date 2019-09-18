@@ -2,7 +2,7 @@
 # Edit at https://www.gitignore.io/?templates=node
 
 ### AWS ###
-parameter.json
+parameters.json
 
 ### Node ###
 # Logs
