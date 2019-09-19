@@ -31,6 +31,7 @@ exports.create = (req, res, next) => {
         members = req.body.members;
         startTime = req.body.startTime;
         organizerEmail = req.user.email;
+        members.push(organizerEmail);
     } catch (err) {
         console.log(err);
         res.status(400).json({
@@ -38,7 +39,8 @@ exports.create = (req, res, next) => {
             data: false
         });
     }
-
+    // console.log(members);
+    
     model_mg.Conf_room.findOne({
         title: title,
         projectId: projectId
@@ -64,6 +66,8 @@ exports.create = (req, res, next) => {
                     });
                 } else {
                     await members.forEach(member => {
+                        console.log(member);
+                        
                         model.ConftUser.create({
                             confTitle: title,
                             projectId: projectId,
@@ -76,19 +80,19 @@ exports.create = (req, res, next) => {
                             console.log(err);
                             res.status(500).json({
                                 message: '서버 오류',
-                                data : false
+                                data: false
                             });
                         });
                     });
                     //conf_user 테이블에 추가
-                    await model.ConftUser.create({
-                        confTitle: title,
-                        projectId: projectId,
-                        email: organizerEmail,
-                        isAdminYn: "Y",
-                        isConfYn: "N",
-                        createdAt: new Date().getTime(),
-                        updatedAt: new Date().getTime()
+                    await model.ConftUser.update({
+                        isAdminYn : "Y"
+                    }, {
+                        where: {
+                            email: organizerEmail,
+                            projectId : projectId,
+                            confTitle : title
+                        }
                     }).then((result) => {
                         if (result) {
                             res.status(201).json({
@@ -112,7 +116,7 @@ exports.create = (req, res, next) => {
                         console.log(err);
                         res.status(500).json({
                             message: '서버 오류',
-                            data : false
+                            data: false
                         });
                     });
                 }
@@ -120,7 +124,7 @@ exports.create = (req, res, next) => {
                 console.log(err);
                 res.status(500).json({
                     message: '서버 오류',
-                    data : false
+                    data: false
                 });
             });
 
@@ -130,7 +134,7 @@ exports.create = (req, res, next) => {
         console.log(err);
         res.status(500).json({
             message: '서버 오류',
-            data : false
+            data: false
         });
     });
 
@@ -143,7 +147,7 @@ exports.create = (req, res, next) => {
         userName
     }
 */
-exports.memberCheck = async(req, res, next) => {
+exports.memberCheck = async (req, res, next) => {
     var projectId;
     var projectName;
     var mamberName;
@@ -160,31 +164,30 @@ exports.memberCheck = async(req, res, next) => {
         console.log(err);
         res.status(400).json({
             message: 'Please check Params',
-            data : false 
+            data: false
         });
     }
     await model_mg.Project.findOne({
-        _id : projectId
-    }).then((result)=>{
-        if(result){
+        _id: projectId
+    }).then((result) => {
+        if (result) {
             projectName = result.name;
             console.log(result.roles);
-            
-            if(!result.roles){
-                roleExist=false;
+
+            if (!result.roles) {
+                roleExist = false;
             }
-        }
-        else{
+        } else {
             res.status(400).json({
                 message: '없는 프로젝트',
-                data : false 
+                data: false
             });
         }
-    }).catch((err)=>{
+    }).catch((err) => {
         console.log(err);
         res.status(500).json({
             message: '서버 오류',
-            data : false
+            data: false
         });
     });
     //동명이인이 있을 수 있기 때문 findAll
@@ -194,7 +197,7 @@ exports.memberCheck = async(req, res, next) => {
         }
     }).then((result) => {
         // console.log(result.length);
-        if(result){
+        if (result) {
             //프로젝트에 있고 부서 설정이 되어있는 member만 가져오기
             var total = result.length;
             var i = 0;
@@ -203,32 +206,30 @@ exports.memberCheck = async(req, res, next) => {
                 // console.log(data.email);
                 if (data.email === organizerEmail) {
                     // console.log(organizerEmail);
-                    i=i+1;
+                    i = i + 1;
                 } else {
                     model.ProjectUser.findOne({
-                        where : {
-                            projectName : projectName,
-                            email : data.email
+                        where: {
+                            projectName: projectName,
+                            email: data.email
                         }
-                    }).then((result)=>{
+                    }).then((result) => {
                         // console.log(result.email);
-                        if(result){
-                            if(result.projectRole||roleExist===false){
+                        if (result) {
+                            if (result.projectRole || roleExist === false) {
                                 var member = {};
                                 member.email = result.email;
                                 member.role = result.projectRole;
                                 searchList.push(member);
                                 console.log(searchList);
                                 i = i + 1;
-                            }
-                            else{
+                            } else {
                                 i = i + 1;
                             }
-                        }
-                        else{
+                        } else {
                             i = i + 1;
                         }
-                        if(i===total){
+                        if (i === total) {
                             // console.log(i);
                             res.status(201).json({
                                 message: '검색 결과',
@@ -237,27 +238,26 @@ exports.memberCheck = async(req, res, next) => {
                                 }
                             });
                         }
-                    }).catch((err)=>{
+                    }).catch((err) => {
                         console.log(err);
                         res.status(500).json({
                             message: '서버 오류',
-                            data : false
+                            data: false
                         });
                     });
                 }
             });
-        }
-        else{
+        } else {
             res.status(400).json({
                 message: '없는 사용자',
-                data : false
+                data: false
             });
         }
     }).catch((err) => {
         console.log(err);
         res.status(500).json({
             message: '서버 오류',
-            data : false
+            data: false
         });
     });
 };
@@ -270,7 +270,7 @@ exports.memberCheck = async(req, res, next) => {
 exports.proceedList = (req, res, next) => {
     //TODO: 현재시간을 기준으로 끝나는시간이 null이고 시작시간이 현재시간보다 이전인 것에 해당하는 회의실 목록만 보여주기
     console.log(new Date().getTime());
-    
+
 };
 
 /*
@@ -289,7 +289,109 @@ exports.includedList = (req, res, next) => {
 */
 //TODO: 회의실에 들어갈때 conf_user에 isConfYn 바꾸는 작업 필요(N-->Y))
 exports.enterConf = (req, res, next) => {
-
+    var confId;
+    var projectId;
+    var confTitle;
+    var mainTopics;
+    var members;
+    var startTime;
+    try {
+        confId = req.params.confId;
+        projectId = req.params.projectId;
+    } catch (error) {
+        console.log(err);
+        res.status(400).json({
+            message: 'Please check Params',
+            data: false
+        });
+    }
+    model_mg.Conf_room.findOne({
+        _id: confId
+    }).then((result) => {
+        if (result) {
+            mainTopics = result.mainTopics;
+            confTitle = result.title;
+            members = result.members;
+            startTime = result.startTime;
+            model.ConftUser.update({
+                isConfYn : "Y"
+            }, {
+                where: {
+                    email: req.user.email,
+                    projectId : projectId,
+                    confTitle : confTitle
+                }
+            }).then((result)=>{
+                if(result){
+                    console.log(confTitle);
+                    
+                    model.ConftUser.findAll({
+                        where : {
+                            projectId : projectId,
+                            confTitle : confTitle,
+                            isConfYn : "Y"
+                        }
+                    }).then((result)=>{
+                        // console.log(result);
+                        if(result){
+                            var email = [];
+                            result.forEach((data)=>{
+                                var object={};
+                                object.email = data.email;
+                                email.push(object);
+                            });
+                            
+                            res.status(201).json({
+                                message: '회의실 들어감(update성공)',
+                                data: {
+                                    confTitle : confTitle,
+                                    mainTopics : mainTopics,
+                                    members : members,
+                                    isConfMemberCount : result.length,
+                                    isConfMember : email,
+                                    startTime : startTime
+                                }
+                            });
+                        }
+                        else{
+                            res.status(202).json({
+                                message: 'update실패',
+                                data: false
+                            });
+                        }
+                    }).catch((err)=>{
+                        console.log(err);
+                        res.status(500).json({
+                            message: '서버 오류',
+                            data: false
+                        });
+                    });
+                }
+                else{
+                    res.status(500).json({
+                        message: '서버 오류',
+                        data: false
+                    });
+                }
+            }).catch((err)=>{
+                console.log(err);
+                res.status(500).json({
+                    message: '서버 오류',
+                    data: false
+                });
+            });
+        } else {
+            res.status(400).json({
+                message: '해당하는 회의실이 존재하지 않음(confId 문제)',
+                data: false
+            });
+        }
+    }).catch((err) => {
+        res.status(500).json({
+            message: '서버 오류',
+            data: false
+        });
+    });
 };
 
 /*
@@ -310,24 +412,24 @@ exports.exitConf = (req, res, next) => {
 //TODO: 동그라미에서 3/4 누르면 회의 참여자들 목록 보여주기
 exports.memberList = (req, res, next) => {
     var confId;
-    var members =[];
+    var members = [];
     try {
         confId = req.params.confId;
     } catch (err) {
         console.log(err);
         res.status(400).json({
             message: 'Please check Params',
-            data : false 
+            data: false
         });
     }
-    
+
     model_mg.Conf_room.findOne({
-        _id : confId
-    }).then((result)=>{
-        if(result){
+        _id: confId
+    }).then((result) => {
+        if (result) {
             // console.log(result);
             result.members.forEach((member) => {
-                var memberObject={};
+                var memberObject = {};
                 memberObject.member = member;
                 members.push(memberObject);
             });
@@ -335,18 +437,17 @@ exports.memberList = (req, res, next) => {
                 message: '참여자 목록',
                 data: members
             });
-        }
-        else{
+        } else {
             res.status(202).json({
                 message: '없는 회의',
                 data: false
             });
         }
-    }).catch((err)=>{
+    }).catch((err) => {
         console.log(err);
         res.status(500).json({
             message: '서버 오류',
-            data : false
+            data: false
         });
     });
 };
