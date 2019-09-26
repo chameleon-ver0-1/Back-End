@@ -185,9 +185,9 @@ exports.list = async (req, res, next) => {
         where: {email: req.user.email}
     }).then((projects) => {
         if (!projects) {
-            res.status(202).json({
-                message: '검색된 프로젝트가 없음',
-                data: false
+            res.status(201).json({
+                message: '참여중인 프로젝트가 없음',
+                data: []
             });
         }
 
