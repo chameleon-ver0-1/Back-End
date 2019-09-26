@@ -216,19 +216,19 @@ exports.list = async (req, res, next) => {
                 id: project._id
             });
         });
-    });
 
-    if (resultData.length === projectNames.length) {
-        res.status(200).json({
-            message: '프로젝트 목록 조회 성공',
-            data: resultData
-        });
-    } else {
-        res.status(202).json({
-            message: '프로젝트 목록 조회에 성공했으나, 일부 ID를 가져오지 못함',
-            data: resultData
-        });
-    }
+        if (resultData.length === projectNames.length) {
+            res.status(200).json({
+                message: '프로젝트 목록 조회 성공',
+                data: resultData
+            });
+        } else {
+            res.status(202).json({
+                message: '프로젝트 목록 조회에 성공했으나, 일부 ID를 가져오지 못함',
+                data: resultData
+            });
+        }
+    });
 };
 
 /*
