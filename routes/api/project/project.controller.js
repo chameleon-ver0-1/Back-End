@@ -176,50 +176,59 @@ exports.create = async (req, res, next) => {
     }
 */
 exports.list = async (req, res, next) => {
-    var projects = [];
-    var total;
+    var projectNames = [];
+    var resultData = [];
+
+    // 프로젝트 이름 가져오기
     await model.ProjectUser.findAll({
         attributes: ['projectName'],
-        where: {
-            email: req.user.email
+        where: {email: req.user.email}
+    }).then((projects) => {
+        if (!projects) {
+            res.status(202).json({
+                message: '검색된 프로젝트가 없음',
+                data: false
+            });
         }
-    }).then(async (data) => {
-        var i = 0;
-        total = data.length;
 
-        data.forEach(async (data) => {
-            var pName = data.dataValues.projectName;
+        projects.forEach((project) => {
+            projectNames.push(project.dataValues.projectName)
+        });
+        console.log('projectNames -*-*-> '+projectNames)
+    });
 
-            await model_mg.Project.findOne({
-                name: pName
-            }).then((result) => {
-                i = i + 1;
-                var project = {};
-                project.name = result.name;
-                project.id = result.id;
-                projects.push(project);
-                if (i === total) {
-                    if (data) {
-                        res.status(201).json({
-                            message: '목록 가져오기 성공',
-                            data: projects
-                        });
-                    } else {
-                        res.status(202).json({
-                            message: '목록 가져오기 실패',
-                            data: false
-                        });
-                    }
-                }
-            }).catch((err) => {
-                console.log(err);
-                res.status(500).json({
-                    message: '서버 오류',
-                    data : false
-                });
+    // 프로젝트 ID 가져오기
+    await model_mg.Project.find(
+        {name: projectNames}
+    ).then((projects) => {
+        if (!projects) {
+            res.status(202).json({
+                message: '프로젝트가 존재하지만 ID를 가져올 수 없음',
+                data: false
+            });
+        }
+
+        console.log(projects);
+
+        projects.forEach((project) => {
+            resultData.push({
+                name: project.name,
+                id: project._id
             });
         });
     });
+
+    if (resultData.length === projectNames.length) {
+        res.status(200).json({
+            message: '프로젝트 목록 조회 성공',
+            data: resultData
+        });
+    } else {
+        res.status(202).json({
+            message: '프로젝트 목록 조회에 성공했으나, 일부 ID를 가져오지 못함',
+            data: resultData
+        });
+    }
 };
 
 /*
