@@ -83,7 +83,7 @@ exports.getList = async (req, res, next) => {
     try {
         var projectId = req.params.projectId;
         var roleData = new Array();
-        var taskData = {};
+        var taskData = [];
         var columnData = {};
     } catch (err) {
         res.status(204).json({
@@ -119,7 +119,7 @@ exports.getList = async (req, res, next) => {
 
         columns.forEach(column => {
             column.taskIds.forEach(task => {
-                taskData[task._id] = task;
+                taskData.push(task);
             });
         });
     });
