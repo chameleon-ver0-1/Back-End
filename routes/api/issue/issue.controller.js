@@ -27,7 +27,7 @@ exports.createIssue = async (req, res, next) => {
         var projectId = req.body.projectId;
         var title = req.body.title || 'Untitled';
         var dDay = req.body.dDay || Date.now();
-        var content = req.body.contnet || '';
+        var content = req.body.content || '';
         var isConfScheduled = req.body.isConfScheduled;
         var attachment = req.body.attachment || '';
         var dept = req.body.dept || '';
@@ -135,13 +135,6 @@ exports.getList = async (req, res, next) => {
             });
         }
 
-<<<<<<< HEAD
-        console.log('loglog -----> '+columns);
-
-        var orderedStatus = ['TODO', 'DOING', 'DONE']
-        columns.forEach(column => {
-            columnData[column.status] = column;
-=======
         if (columns.length != 3) {
             res.status(404).json({
                 message: "칼럼 일부를 찾을 수 없음",
@@ -159,7 +152,6 @@ exports.getList = async (req, res, next) => {
                     columnData[column.status] = column;
                 }
             });
->>>>>>> 48ce9cab96f18bbca1c0b43df810575cdcd27123
         });
 
         res.status(200).json({
