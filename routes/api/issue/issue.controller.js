@@ -139,6 +139,9 @@ exports.getList = async (req, res, next) => {
             });
         }
 
+        console.log('loglog -----> '+columns);
+
+        var orderedStatus = ['TODO', 'DOING', 'DONE']
         columns.forEach(column => {
             columnData[column.status] = column;
         });
@@ -146,8 +149,8 @@ exports.getList = async (req, res, next) => {
         res.status(200).json({
             message: "이슈 조회 성공",
             data: {
-                roleData:roleData,
-                taskData:taskData,
+                roleData: roleData,
+                taskData: taskData,
                 columnData: columnData
             }
         });
