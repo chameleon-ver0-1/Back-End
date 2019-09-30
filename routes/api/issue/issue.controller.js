@@ -139,9 +139,18 @@ exports.getList = async (req, res, next) => {
             });
         }
 
-        columns.forEach(column => {
-            columnData[column.status] = column;
+        var statusList = ['TODO', 'DOING', 'DONE']
+        statusList.forEach(status => {
+            for (var column in columns) {
+                if (column.status === status) {
+                    columnData[column.status] = column;
+                    break;
+                }
+            }
         });
+        // columns.forEach(column => {
+        //     columnData[column.status] = column;
+        // });
 
         res.status(200).json({
             message: "이슈 조회 성공",
