@@ -15,17 +15,13 @@ passport.use(new JwtStrategy({
 }, async (payload, done) => {
   try {
     // Find the user specified in token
-    model.User.findOne({
-                        where : {email : payload.sub}
-                      })
-                      
-    .then((user) => {
-      // If user doesn't exist
-      if(!user) {
+    model.User.findOne(
+      {where : {email : payload.sub}}
+    ).then((user) => {
+      if (!user) {
         return done(null, false);
       }
 
-      // If user exists
       done(null, user);
     });
 
@@ -76,11 +72,9 @@ passport.use(new LocalStrategy({
 }, async (email, password, done) => {
   try {
     // Find a user with Email
-    model.User.findOne({
-                        where : { email : email } 
-                      })
-
-    .then((user) => {
+    model.User.findOne(
+      {where : { email : email }}
+    ).then((user) => {
       // If user doesn't exist
       if (!user) {
         return done(null, false);

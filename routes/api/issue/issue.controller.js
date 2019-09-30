@@ -27,7 +27,7 @@ exports.createIssue = async (req, res, next) => {
         var projectId = req.body.projectId;
         var title = req.body.title || 'Untitled';
         var dDay = req.body.dDay || Date.now();
-        var content = req.body.contnet || '';
+        var content = req.body.content || '';
         var isConfScheduled = req.body.isConfScheduled;
         var attachment = req.body.attachment || '';
         var dept = req.body.dept || '';
@@ -60,8 +60,6 @@ exports.createIssue = async (req, res, next) => {
 
         issueTask = task;
         issueId = task._id;
-
-        console.log(issueTask);
     });
 
     // 이슈 컬럼에 생성된 이슈 카드를 추가
@@ -69,7 +67,7 @@ exports.createIssue = async (req, res, next) => {
         { status: 'TODO', projectId: projectId },
         { $push: { taskIds : issueId }}
     ).then((result) => {
-        console.log("here =====> " + issue)
+
         res.status(200).json({
             message: '이슈 생성 성공',
             data: issueTask
@@ -85,7 +83,7 @@ exports.getList = async (req, res, next) => {
     try {
         var projectId = req.params.projectId;
         var roleData = new Array();
-        var taskData = {};
+        var taskData = [];
         var columnData = {};
     } catch (err) {
         res.status(204).json({
@@ -119,11 +117,9 @@ exports.getList = async (req, res, next) => {
             });
         }
 
-        console.log(columns);
-
         columns.forEach(column => {
             column.taskIds.forEach(task => {
-                taskData[task._id] = task;
+                taskData.push(task);
             });
         });
     });
@@ -139,15 +135,30 @@ exports.getList = async (req, res, next) => {
             });
         }
 
-        columns.forEach(column => {
-            columnData[column.status] = column;
+        if (columns.length != 3) {
+            res.status(404).json({
+                message: "칼럼 일부를 찾을 수 없음",
+                data: false
+            });
+        }
+        
+        // 상태 순서대로 정렬
+        var statusList = ['TODO', 'DOING', 'DONE'];
+
+        statusList.forEach(status => {
+            columns.forEach(column => {
+                console.log(column.status);
+                if (column.status === status) {
+                    columnData[column.status] = column;
+                }
+            });
         });
 
         res.status(200).json({
             message: "이슈 조회 성공",
             data: {
-                roleData:roleData,
-                taskData:taskData,
+                roleData: roleData,
+                taskData: taskData,
                 columnData: columnData
             }
         });
@@ -288,8 +299,6 @@ exports.getComments = async (req, res, next) => {
             message: "댓글 조회 성공",
             data: data.commentIds
         })
-
-        console.log(data);
     });
 };
 
@@ -335,7 +344,6 @@ exports.createComment = async (req, res, next) => {
             });
         }
 
-        console.log("comment_id ====> " + comment._id);
         commentData = comment;
     });
 
