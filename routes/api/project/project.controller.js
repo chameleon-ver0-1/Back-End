@@ -243,17 +243,19 @@ exports.roleList = async (req, res, next) => {
         projectId = req.params.projectId;
     } catch (err) {
         console.log(err);
+
         res.status(400).json({
             message: 'Please check Params',
             data : false
         });
     }
-    model_mg.Project.findOne({
+
+    await model_mg.Project.findOne({
         _id: projectId
     }).then((result) => {
         // console.log(result.roles.length);
         result.roles.forEach((role) => {
-            var roleObject={};
+            var roleObject = {};
             roleObject.role = role;
             roles.push(roleObject);
         });
@@ -272,6 +274,7 @@ exports.roleList = async (req, res, next) => {
         }
     }).catch((err) => {
         console.log(err);
+        
         res.status(500).json({
             message: '서버 오류',
             data : false
