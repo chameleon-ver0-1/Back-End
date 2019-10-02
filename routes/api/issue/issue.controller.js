@@ -84,7 +84,7 @@ exports.getList = async (req, res, next) => {
         var projectId = req.params.projectId;
         var roleData = new Array();
         var taskData = [];
-        var columnData = [];
+        var columnData = {};
     } catch (err) {
         res.status(204).json({
             message: 'Please check Params',
@@ -149,7 +149,7 @@ exports.getList = async (req, res, next) => {
             columns.forEach(column => {
                 console.log(column.status);
                 if (column.status === status) {
-                    columnData.push(column);
+                    columnData[column.status] = column;
                 }
             });
         });
