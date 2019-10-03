@@ -387,21 +387,13 @@ exports.enterConf = (req, res, next) => {
             });
         }
     }).catch((err) => {
+        console.log(err);
+        
         res.status(500).json({
             message: '서버 오류',
             data: false
         });
     });
-};
-
-/*
-    GET /api/conf_room/exitConf/:projectId/:confId
-    {
-    }
-*/
-//TODO: 회의실에 나갈때 conf_user에 isConfYn 바꾸는 작업 필요(Y-->N))
-exports.exitConf = (req, res, next) => {
-
 };
 
 /*
