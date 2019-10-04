@@ -219,15 +219,15 @@ exports.deleteTask = async (req, res, next) => {
 }
 
 /* 
-    ****< 이슈 상태 변경 >****
-    POST /api/issue/changestatus
+    ****< 이슈 순서, 상태 저장 >****
+    POST /api/issue/savestatus
     {
         taskId,
         exStatusId,
         newStatusId
     }
 */
-exports.changeStatus = async (req, res, next) => {
+exports.saveStatus = async (req, res, next) => {
     try {
         var taskId = req.body.taskId;
         var exStatusId = req.body.exStatusId;
