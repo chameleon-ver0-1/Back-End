@@ -17,8 +17,6 @@ router.get('/proceedList/:projectId', passportJWT, controller.proceedList);
 router.get('/includedList/:projectId', passportJWT, controller.includedList);
 //TODO: 회의에 들어갈때 user의 isConfYn 변경
 router.get('/enterConf/:projectId/:confId', passportJWT, controller.enterConf);
-//TODO: 회의에 나갈때 user의 isConfYn 변경
-router.get('/exitConf/:projectId/:confId', passportJWT, controller.exitConf);
 //TODO: 3/4누를때 member목록 
 router.get('/memberList/:projectId/:confId', passportJWT, controller.memberList);
 
