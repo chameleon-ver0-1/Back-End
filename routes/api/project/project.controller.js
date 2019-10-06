@@ -194,7 +194,7 @@ exports.list = async (req, res, next) => {
         projects.forEach((project) => {
             projectNames.push(project.dataValues.projectName)
         });
-        console.log('projectNames -*-*-> '+projectNames)
+        console.log('projectNames -*-*-> '+projectNames);
     });
 
     // 프로젝트 ID 가져오기

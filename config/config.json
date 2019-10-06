@@ -1,7 +1,7 @@
 {
   "development": {
     "username": "root",
-    "password": "soup2010good",
+    "password": "yejigood",
     "database": "develop",
     "host": "127.0.0.1",
     "dialect": "mysql"
