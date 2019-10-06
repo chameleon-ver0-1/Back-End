@@ -2,6 +2,11 @@ const model = require('../../../models');
 const model_mg = require('../../../models_mg');
 require("dotenv").config({ path: __dirname + "\\" + ".env" });
 
+async function asyncForEach(array, callback) {
+    for (let index = 0; index < array.length; index++) {
+      await callback(array[index], index, array);
+    }
+}
 
 /*
     ****< 이슈 생성 >****
@@ -222,53 +227,57 @@ exports.deleteTask = async (req, res, next) => {
     ****< 이슈 순서, 상태 저장 >****
     POST /api/issue/savestatus
     {
-        taskId,
-        exStatusId,
-        newStatusId
+        columnData
     }
 */
 exports.saveStatus = async (req, res, next) => {
     try {
-        var taskId = req.body.taskId;
-        var exStatusId = req.body.exStatusId;
-        var newStatusId = req.body.newStatusId;
+        var columnData = req.body.columnData;
     } catch (err) {
-        res.status(204).json({
-            message: "Please check Params",
+        res.status(400).json({
+            message: "Bad Request",
             data: false
         });
     }
 
-    // 이전 상태에서 제거
-    await model_mg.Issue.column.update(
-        { _id: exStatusId },
-        { $pull: { taskIds: taskId }}
-    ).then((result) => {
-        if (!result) {
-            res.status(200).json({
-                message: '이슈 상태변경 실패',
-                data: false
-            });
-        }
-    });
+    console.log(columnData);
 
-    // 새로운 상태로 업데이트
-    await model_mg.Issue.column.update(
-        { _id: newStatusId },
-        { $push: { taskIds: taskId }}
-    ).then((result) => {
-        if (!result) {
-            res.status(200).json({
-                message: '이슈 상태변경 실패',
-                data: false
-            });
-        }
+    var statusList = ['TODO', 'DOING', 'DONE'];
+    var successList = [];
 
-        res.status(200).json({
-            message: '이슈 상태변경 성공',
-            data: false
+    await asyncForEach(statusList, async (status) => {
+        var columnId = columnData[status]._id;
+        var taskIds = columnData[status].taskIds;
+
+        await model_mg.Issue.column.update(
+            { _id: columnId },
+            { $set: { taskIds: taskIds }}
+        ).then((result) => {
+            if (!result) {
+                res.status(204).json({
+                    message: '이슈 상태 반영 실패',
+                    data: false
+                });
+            }
+
+            console.log('status =#=#=> '+status);
+            successList.push(status);
+        }).catch((err) => {
+            console.log(err);
         });
     });
+
+    if (successList.length === 3) {
+        res.status(200).json({
+            message: '이슈 상태 반영 성공',
+            data: columnData
+        });
+    } else {
+        res.status(204).json({
+            message: '이슈 상태 반영에 성공한 게 맞을까 아닐까 사실 나도 잘 몰라ㅎㅎ',
+            data: false
+        });
+    }
 };
 
 /*

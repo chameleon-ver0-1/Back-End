@@ -7,7 +7,7 @@ const passportJWT = passport.authenticate('jwt', { session: false });
 
 
 /* ROUTING METHOD */
-router.get('/:projectId', passportJWT, controller.memberList);
+// router.get('/:projectId', passportJWT, controller.memberList);
 
 
 module.exports = router;

@@ -7,37 +7,30 @@ require("dotenv").config({ path: __dirname + "\\" + ".env" });
     GET /api/chat/:projectId
 */
 exports.memberList = async (req, res, next) => {
-    var commentData;
-
     try {
-        var taskId = req.body.taskId;
-        var username = req.body.username;
-        var usernameEn = req.body.usernameEn;
-        var userImg = req.body.userImg;
-        var content = req.body.content;
+        var projectId = req.params.projectId;
+        var projectName;
+        var memberData = {};
     } catch {
         res.status(400).json({
-            message: "Please check Params",
+            message: "Bad Request",
             data: false
         });
     }
     
-    // 댓글 생성
-    await model_mg.Issue.comment.create({
-        email: req.user.email,
-        name: username,
-        name_en: usernameEn,
-        profileImg: userImg,
-        content: content
-    })
-    .then((comment) => {
-        if (!comment) {
-            res.status(204).json({
-                message: '댓글 생성 실패'
+    // 프로젝트 이름 검색
+    await model_mg.Project.findById(projectId, (err,project) => {
+        if (err) {
+            res.status(404).json({
+                message: '프로젝트 이름 검색 실패',
+                data: false
             });
         }
 
-        commentData = comment;
+        projectName = project.name;
+        project.roles.forEach(role => {
+            memberData['role'] = [];
+        });
     });
 
     await model_mg.Issue.task.update(

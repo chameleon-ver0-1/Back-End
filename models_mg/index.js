@@ -10,7 +10,7 @@ mongoose.set('useFindAndModify', false);
 var mongodb = mongoose.connection;
 
 mongodb.on('error', console.error);
-mongodb.once('open', function(){
+mongodb.once('open', function() {
     console.log("Connected to mongodb server");
 });
 mongoose.connect('mongodb://localhost/develop', {useNewUrlParser : true});
