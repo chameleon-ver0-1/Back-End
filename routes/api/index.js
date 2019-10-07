@@ -4,7 +4,6 @@ const project = require('./project');
 const issue = require('./issue');
 const conf_log = require('./conf_log');
 const conf_room = require('./conf_room');
-const conf_log = require('./conf_log');
 const chat = require('./chat');
 
 router.use('/auth', auth);

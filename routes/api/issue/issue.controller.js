@@ -15,6 +15,7 @@ async function asyncForEach(array, callback) {
         projectId,
         title,
         dDay,
+        dTime,
         content,
         isConfScheduled,
         attachment,
@@ -31,7 +32,8 @@ exports.createIssue = async (req, res, next) => {
     try {
         var projectId = req.body.projectId;
         var title = req.body.title || 'Untitled';
-        var dDay = req.body.dDay || Date.now();
+        var dDay = req.body.dDay || null;
+        var dTime = req.body.dTime || null;
         var content = req.body.content || '';
         var isConfScheduled = req.body.isConfScheduled;
         var attachment = req.body.attachment || '';
@@ -50,6 +52,7 @@ exports.createIssue = async (req, res, next) => {
     await model_mg.Issue.task.create({
         title: title,
         dDay: dDay,
+        dTime: dTime,
         content: content,
         isConfScheduled: isConfScheduled,
         attachment: attachment,
@@ -260,7 +263,7 @@ exports.saveStatus = async (req, res, next) => {
                 });
             }
 
-            console.log('status =#=#=> '+status);
+            console.dir('status =#=#=> '+status); //
             successList.push(status);
         }).catch((err) => {
             console.log(err);

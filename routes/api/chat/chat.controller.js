@@ -10,7 +10,8 @@ exports.memberList = async (req, res, next) => {
     try {
         var projectId = req.params.projectId;
         var projectName;
-        var memberData = {};
+        var memberData;
+        var deptData = {};
     } catch {
         res.status(400).json({
             message: "Bad Request",
@@ -29,17 +30,15 @@ exports.memberList = async (req, res, next) => {
 
         projectName = project.name;
         project.roles.forEach(role => {
-            memberData['role'] = [];
+            deptData[role] = [];
         });
     });
 
-    await model_mg.Issue.task.update(
-        { _id: taskId },
-        { $push: { commentIds: commentData._id }}
-    ).then((result) => {
-        res.status(200).json({
-            message: '댓글 생성 성공',
-            data: commentData
-        });
+    await model.ProjectUser.find({
+        where: {projectName: projectName},
+        include: [{model: model.User, as: 'email'}]
+    }).then((members) => {
+        console.log(members);
     });
+    res.status(200).json({message: 'here'});
 };
