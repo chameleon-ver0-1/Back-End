@@ -10,6 +10,7 @@ issue_task = (mongoose) => { return mongoose.model('task',
     mongoose.Schema({
         title: String,
         dDay: Date,
+        dTime: String,
         content: String,
         isConfScheduled: Boolean,
         attachment: String,
