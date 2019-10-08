@@ -68,7 +68,7 @@ exports.create = (req, res, next) => {
                     await members.forEach(member => {
                         console.log(member);
 
-                        model.ConftUser.create({
+                        model.ConfUser.create({
                             confTitle: title,
                             projectId: projectId,
                             email: member,
@@ -85,7 +85,7 @@ exports.create = (req, res, next) => {
                         });
                     });
                     //conf_user 테이블에 추가
-                    await model.ConftUser.update({
+                    await model.ConfUser.update({
                         isAdminYn: "Y"
                     }, {
                         where: {
@@ -380,10 +380,25 @@ exports.includedList = async (req, res, next) => {
         if (results) {
             console.log(results.length);
             var i = 0;
-            results.forEach((result) => {
+            results.forEach(async(result) => {
                 if (result.startTime > new Date().getTime()) {
+                    var confYEmail = [];
+                    await model.ConfUser.findAll({
+                        where: {
+                            projectId: projectId,
+                            confTitle: result.title,
+                            isConfYn: "Y"
+                        }
+                    }).then((result) => {
+                        // console.log(result);
+                        if (result) {
+                            result.forEach((data) => {
+                                confYEmail.push(data.email);
+                            });
+                        }
+                    });
                     //예정된 회의실 찾음
-                    model.ConfUser.findOne({
+                    await model.ConfUser.findOne({
                         where: {
                             confTitle: result.title,
                             isAdminYn: "Y"
@@ -401,6 +416,8 @@ exports.includedList = async (req, res, next) => {
                                 title: result.title,
                                 members: result.members,
                                 membersTotal: result.members.length,
+                                isConfYMembers : confYEmail,
+                                isConfYMembersTotal : confYEmail.length,
                                 adminEmail: data.name
                             });
 
@@ -463,7 +480,7 @@ exports.enterConf = (req, res, next) => {
             confTitle = result.title;
             members = result.members;
             startTime = result.startTime;
-            model.ConftUser.update({
+            model.ConfUser.update({
                 isConfYn: "Y"
             }, {
                 where: {
@@ -475,7 +492,7 @@ exports.enterConf = (req, res, next) => {
                 if (result) {
                     console.log(confTitle);
 
-                    model.ConftUser.findAll({
+                    model.ConfUser.findAll({
                         where: {
                             projectId: projectId,
                             confTitle: confTitle,
