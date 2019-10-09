@@ -77,7 +77,7 @@ exports.createIssue = async (req, res, next) => {
 
         dept = project.dataValues.projectRole;
 
-        console.log('projectRole -*-*-> '+projectRole);
+        console.log('projectRole -*-*-> '+dept);
     });
 
     // 이슈 카드를 생성
