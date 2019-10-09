@@ -75,9 +75,15 @@ exports.createIssue = async (req, res, next) => {
             });
         }
 
-        dept = project.dataValues.projectRole;
-
-        console.log('projectRole -*-*-> '+dept);
+        try {
+            dept = project.dataValues.projectRole;
+            console.log('projectRole -*-*-> '+dept);
+        } catch(err) {
+            res.status(202).json({
+                message: '부서가 설정되지 않은 사용자',
+                data: false
+            });
+        }
     });
 
     // 이슈 카드를 생성
