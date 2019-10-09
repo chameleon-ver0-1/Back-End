@@ -290,6 +290,12 @@ exports.includedList = async (req, res, next) => {
         if (results) {
             console.log(results.length);
             var i = 0;
+            if(results.length===0){
+                res.status(202).json({
+                    message: '결과 없음',
+                    data: []
+                });
+            }
             results.forEach(async(result) => {
                 if (result.startTime > new Date().getTime()) {
                     var confYEmail = [];
@@ -414,7 +420,6 @@ exports.enterConf = async(req, res, next) => {
                 }
             }
         });
-        //FIXME: 필요한 부분인가
         await model.ConfUser.findOne({
             where : {
                 confTitle : title,
@@ -469,6 +474,7 @@ exports.enterConf = async(req, res, next) => {
                             res.status(201).json({
                                 message: '회의실 들어감(update성공)',
                                 data: {
+                                    confId : confId,
                                     confTitle: confTitle,
                                     mainTopics: mainTopics,
                                     members: members,
@@ -513,7 +519,7 @@ exports.enterConf = async(req, res, next) => {
     {
     }
 */
-//TODO: 동그라미에서 3/4 누르면 회의 참여자들 목록 보여주기
+//FIXME: 동그라미에서 3/4 누르면 회의 참여자들 목록 보여주기
 exports.memberList = (req, res, next) => {
     var confId;
     var members = [];
@@ -554,4 +560,30 @@ exports.memberList = (req, res, next) => {
             data: false
         });
     });
+};
+
+/*
+    GET /api/conf_room/exitConf/:projectId/:confId
+    {
+    }
+*/
+//TODO: 회의 종료 API --> 상태변경 및 회의록 데이터 생성
+exports.exitConf = (req, res, next) => {
+    var confId;
+    var projectId;
+    var userEmail;
+    try {
+        projectId = req.params.projectId;
+        confId = req.params.confId;
+        userEmail = req.user.email;
+    } catch (err) {
+        console.log(err);
+        res.status(400).json({
+            message: 'Please check Params',
+            data : false
+        });
+    }
+
+    //TODO: 상태변경
+
 };
