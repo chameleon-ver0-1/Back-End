@@ -408,7 +408,7 @@ exports.enterConf = async(req, res, next) => {
             if(data){
                 if(data.isConfYn == 'Y'){
                     res.status(202).json({
-                        message: '이미 회의에 들어감',
+                        message: '회의 참여중인 사용자',
                         data: false
                     });
                 }
@@ -418,9 +418,15 @@ exports.enterConf = async(req, res, next) => {
         await model.ConfUser.findOne({
             where : {
                 confTitle : title,
-                isConfYn : "Y"
+                isAdminYn : "Y"
             }
         }).then((data)=>{
+            if(!data){
+                res.status(202).json({
+                    message: '개설자 없음',
+                    data: false
+                });
+            }
             console.log(data.email);
             confLeaderEmail = data.email;   
         }); 
@@ -457,9 +463,7 @@ exports.enterConf = async(req, res, next) => {
                         if (result) {
                             var email = [];
                             result.forEach((data) => {
-                                var object = {};
-                                object.email = data.email;
-                                email.push(object);
+                                email.push(data.email);
                             });
 
                             res.status(201).json({
@@ -470,7 +474,7 @@ exports.enterConf = async(req, res, next) => {
                                     members: members,
                                     isConfMemberCount: result.length,
                                     isConfMember: email,
-                                    //TODO: 회의 개설자 토근 넘겨주기
+                                    confLeader: confLeaderEmail,
                                     startTime: startTime
                                 }
                             });
