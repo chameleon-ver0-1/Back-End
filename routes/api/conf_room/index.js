@@ -13,11 +13,13 @@ router.post('/create/:projectId', passportJWT, controller.create);
 router.post('/memberCheck/:projectId', passportJWT, controller.memberCheck);
 //TODO: 현재 진행 중인 회의 목록
 router.get('/proceedList/:projectId', passportJWT, controller.proceedList);
-//TODO: 내가 포함된 회의 목록
+//내가 포함된 회의 목록
 router.get('/includedList/:projectId', passportJWT, controller.includedList);
-//TODO: 회의에 들어갈때 user의 isConfYn 변경
+//회의에 들어갈 때 user의 isConfYn 변경
 router.get('/enterConf/:projectId/:confId', passportJWT, controller.enterConf);
-//TODO: 3/4누를때 member목록 
+//FIXME: 3/4누를때 member목록 
 router.get('/memberList/:projectId/:confId', passportJWT, controller.memberList);
+//TODO: 회의에 나갈 때 
+router.get('/exitConf/:projectId/:confId', passportJWT, controller.exitConf);
 
 module.exports = router;
