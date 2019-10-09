@@ -61,14 +61,14 @@ exports.createIssue = async (req, res, next) => {
             });
         }
 
+        console.log('projectName -*-*-> '+project.name);
         projectName = project.name;
     });
 
     await model.ProjectUser.findOne({
-        attributes: ['projectRole'],
         where: {email: req.user.email, projectName: projectName}
     }).then((project) => {
-        if (!projects) {
+        if (!project) {
             res.status(202).json({
                 message: '부서 가져오기 실패',
                 data: false
