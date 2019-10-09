@@ -280,96 +280,6 @@ exports.includedList = async (req, res, next) => {
         });
     }
 
-    ////회의실 이름 가져오기
-    //await model.ConfUser.findAll({
-    //    attributes: ['confTitle'],
-    //    where: {
-    //        email: myEmail
-    //    }
-    //}).then((confRooms) => {
-    //    if (!confRooms) {
-    //       res.status(201).json({
-    //            message: '참여중인 회의가 없음',
-    //            data: []
-    //        });
-    //    }
-    //
-    //    confRooms.forEach((confRoom) => {
-    //        confTitles.push(confRoom.dataValues.confTitle);
-    //    });
-    //    console.log('confTitles -*-*-> ' + confTitles);
-    //}).catch((err) => {
-    //    console.log(err);
-    //    
-    //    res.status(500).json({
-    //        message: '서버 오류',
-    //        data: false
-    //    });
-    //});
-
-    //    //TODO: 회의실 개설자 참여중인 사람 목록 가져오기
-    //    await model.ConfUser.findAll({
-    //        where: {
-    //            confTitle : { $in: confTitles }
-    //        }
-    //    }).then((confRooms) => {
-    //        console.log(confRooms);
-    //
-    //        confRooms.forEach((confRoom) => {
-    //            
-    //        });
-    //    }).catch((err)=>{
-    //        console.log(err);
-    //        
-    //        res.status(500).json({
-    //            message: '서버 오류',
-    //            data : false
-    //        });
-    //    });
-    //
-    //    //회의실 정보 가져오기
-    //    await model_mg.Conf_room.find({
-    //        title: confTitles,
-    //        projectId : projectId
-    //    }).then((confRooms) => {
-    //        if (!confRooms) {
-    //            res.status(202).json({
-    //                message: '참여중인 회의가 없음',
-    //                data: false
-    //            });
-    //        }
-    //       
-    //        var i =0;
-    //        confRooms.forEach((confRoom) => {
-    //            if (confRoom.startTime > new Date().getTime()) {
-    //                console.log(confRoom);
-    //                i++;
-    //                resultData.push({
-    //                    startTime: confRoom.startTime,
-    //                    title: confRoom.title,
-    //                    members: confRoom.members,
-    //                    membersTotal: confRoom.members.length
-    //                });
-    //            }
-    //            else{
-    //                i++;
-    //            }
-    //        });
-    //        if (i === confRooms.length) {
-    //            res.status(200).json({
-    //               message: '내가 포함된 회의 목록 조회 성공',
-    //                data: resultData
-    //            });
-    //        }
-    //    }).catch((err)=>{
-    //        console.log(err);
-    //        
-    //        res.status(500).json({
-    //            message: '서버 오류',
-    //            data : false
-    //        });
-    //    });
-
     //나를 포함하는 회의실 찾기
     await model_mg.Conf_room.find({
         members: {
@@ -455,16 +365,20 @@ exports.includedList = async (req, res, next) => {
     }
 */
 //TODO: 회의실에 들어갈때 conf_user에 isConfYn 바꾸는 작업 필요(N-->Y))
-exports.enterConf = (req, res, next) => {
+exports.enterConf = async(req, res, next) => {
     var confId;
     var projectId;
     var confTitle;
     var mainTopics;
     var members;
     var startTime;
+    var email;
+    var title;
+    var confLeaderEmail;
     try {
         confId = req.params.confId;
         projectId = req.params.projectId;
+        email = req.user.email;
     } catch (error) {
         console.log(err);
         res.status(400).json({
@@ -472,7 +386,47 @@ exports.enterConf = (req, res, next) => {
             data: false
         });
     }
-    model_mg.Conf_room.findOne({
+
+    await model_mg.Conf_room.findOne({
+        _id: confId
+    }).then(async(result) => {
+        if(!result){
+            res.status(400).json({
+                message: '없는 회의실',
+                data: false
+            });
+        }
+        title = result.title;
+        await model.ConfUser.findOne({
+            where : {
+                email : email,
+                confTitle : title
+            }
+        }).then((data)=>{
+            console.log(data.isConfYn);
+            
+            if(data){
+                if(data.isConfYn == 'Y'){
+                    res.status(202).json({
+                        message: '이미 회의에 들어감',
+                        data: false
+                    });
+                }
+            }
+        });
+        //FIXME: 필요한 부분인가
+        await model.ConfUser.findOne({
+            where : {
+                confTitle : title,
+                isConfYn : "Y"
+            }
+        }).then((data)=>{
+            console.log(data.email);
+            confLeaderEmail = data.email;   
+        }); 
+    });
+
+    await model_mg.Conf_room.findOne({
         _id: confId
     }).then((result) => {
         if (result) {
@@ -516,6 +470,7 @@ exports.enterConf = (req, res, next) => {
                                     members: members,
                                     isConfMemberCount: result.length,
                                     isConfMember: email,
+                                    //TODO: 회의 개설자 토근 넘겨주기
                                     startTime: startTime
                                 }
                             });
