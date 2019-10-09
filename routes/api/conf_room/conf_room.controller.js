@@ -20,7 +20,7 @@ exports.create = (req, res, next) => {
     //id 제외 총 7개 속성 갖고있음
     var title; //방 제목
     var members; // 참여자
-    var mainTopics; //메인 토픽 
+    var mainTopics; //메인 토픽
     var startTime; // 시작 시간
     var organizerEmail; //회의 개설자 이메일
     var projectId;

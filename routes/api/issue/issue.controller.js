@@ -19,7 +19,7 @@ async function asyncForEach(array, callback) {
         content,
         isConfScheduled,
         attachment,
-        dept,
+        // dept,
         username,
         usernameEn,
         userImg
@@ -37,16 +37,48 @@ exports.createIssue = async (req, res, next) => {
         var content = req.body.content || '';
         var isConfScheduled = req.body.isConfScheduled;
         var attachment = req.body.attachment || '';
-        var dept = req.body.dept || '';
+        var dept;
         var writerName = req.body.username;
         var writerNameEn = req.body.usernameEn;
         var writerImg = req.body.userImg;
+
+        var projectName;
     } catch {
         res.status(400).json({
             message: 'Please check Params',
             data: false
         });
     }
+
+    // FIXME: join 가능하게 고치고 한번만 쿼리
+    // FIXME: ProjectUser 테이블에 ProjectId 필드 추가
+    // 유저 정보, 속한 부서 가져오기(일단 부서만 구현)
+    await model_mg.Project.findById(projectId, (err, project) => {
+        if (err) {
+            res.status(202).json({
+                message: "프로젝트 이름 조회 중 에러 발생",
+                data: false
+            });
+        }
+
+        projectName = project.name;
+    });
+
+    await model.ProjectUser.findOne({
+        attributes: ['projectRole'],
+        where: {email: req.user.email, projectName: projectName}
+    }).then((project) => {
+        if (!projects) {
+            res.status(202).json({
+                message: '부서 가져오기 실패',
+                data: false
+            });
+        }
+
+        dept = project.dataValues.projectRole;
+
+        console.log('projectRole -*-*-> '+projectRole);
+    });
 
     // 이슈 카드를 생성
     await model_mg.Issue.task.create({
