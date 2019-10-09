@@ -6,6 +6,6 @@ module.exports = (mongoose) => {
         mainTopics : [String],
         startTime : Date,
         endTime : Date,
-        projectId :{ type: mongoose.Schema.Types.ObjectId}
+        projectId :{ type: mongoose.Schema.Types.ObjectId, ref: 'project'}
     }));
 };

@@ -32,7 +32,6 @@ exports.list = async (req, res, next) => {
             data : false
         });
     }
-    //TODO: 페이징처리해야함
     await model_mg.Conf_log.conf_logs.paginate({
         projectId : projectId},options)
         .then((result) => {
@@ -104,7 +103,6 @@ exports.search = async (req, res, next) => {
             data : false
         });
     }
-    //TODO: 페이징처리해야함
     await model_mg.Conf_log.conf_logs.paginate({
         projectId : projectId,
         title : new RegExp(search)
@@ -147,4 +145,16 @@ exports.search = async (req, res, next) => {
             data: false
         });
     });
+};
+
+/*
+    get /api/conf_log/detail/:projectId/:detailId
+    {
+        
+    }
+*/
+//TODO: 키워드를 key,value로 넘겨줄건지 아니면 그냥 문자배열해서 임의로 값의 차이를 둘건지
+//TODO: 주제별 요약이면 첫번째 배열은 첫번째 주제 뭐 이렇게하는건가 -> 이것도 key value 필요없는지
+exports.detail = async (req, res, next) => {
+
 };

@@ -7,8 +7,8 @@ conf_logs = (mongoose) => {
         endTime : Date,
         mainTopics : [String],
         totalLogFile : String,//정제되지 않은(전체 회의기록) txt 파일이 있는 경로
-        projectId : { type: mongoose.Schema.Types.ObjectId}, 
-        details : [{ type: mongoose.Schema.Types.ObjectId}]
+        projectId : { type: mongoose.Schema.Types.ObjectId, ref: 'project'}, 
+        details : [{ type: mongoose.Schema.Types.ObjectId, ref: 'conf_log_detail'}]
     });
     schema.plugin(mongoosePaginate);
     return mongoose.model('conf_log', schema );
