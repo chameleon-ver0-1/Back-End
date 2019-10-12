@@ -24,6 +24,7 @@ exports.create = (req, res, next) => {
     var startTime; // 시작 시간
     var organizerEmail; //회의 개설자 이메일
     var projectId;
+    var confId;
     try {
         projectId = req.params.projectId;
         title = req.body.title;
@@ -65,8 +66,11 @@ exports.create = (req, res, next) => {
                         data: false
                     });
                 } else {
+                    confId = result._id;
+                    // console.log(result._id);
+                    
                     await members.forEach(member => {
-                        console.log(member);
+                        // console.log(member);
 
                         model.ConfUser.create({
                             confTitle: title,
@@ -95,9 +99,11 @@ exports.create = (req, res, next) => {
                         }
                     }).then((result) => {
                         if (result) {
+                            
                             res.status(201).json({
                                 message: '회의실 생성 성공',
                                 data: {
+                                    id : confId,
                                     title: title,
                                     members: members,
                                     confLeader: organizerEmail,
@@ -563,15 +569,15 @@ exports.memberList = (req, res, next) => {
 };
 
 /*
-    GET /api/conf_room/exitConf/:projectId/:confId
+    GET /api/conf_room/endConf/:projectId/:confId
     {
     }
 */
-//TODO: 회의 종료 API --> 상태변경 및 회의록 데이터 생성
-exports.exitConf = (req, res, next) => {
+//TODO: 회의 종료 API --> 상태변경 & 회의록 생성 & endTime 지정 (회읙 개설자만 누를 수 있음)
+exports.endConf = (req, res, next) => {
     var confId;
     var projectId;
-    var userEmail;
+    var confLeaderEmail;
     try {
         projectId = req.params.projectId;
         confId = req.params.confId;
@@ -586,4 +592,87 @@ exports.exitConf = (req, res, next) => {
 
     //TODO: 상태변경
 
+};
+
+/*
+    GET /api/conf_room/exitConf/:projectId/:confId
+    {
+    }
+*/
+//TODO: 회의 나가는 API --> 한사람이 나가는 API (단순 상태변경) 
+exports.exitConf = async(req, res, next) => {
+    var confId;
+    var projectId;
+    var userEmail;
+    var confTitle;
+    try {
+        projectId = req.params.projectId;
+        confId = req.params.confId;
+        userEmail = req.user.email;
+    } catch (err) {
+        console.log(err);
+        res.status(400).json({
+            message: 'Please check Params',
+            data : false
+        });
+    }
+
+    await model_mg.Conf_room.find({
+        _id : confId
+    }).then((data)=>{
+        if(!data){
+            res.status(202).json({
+                message: '없는 회의실',
+                data: false
+            });
+        }
+        confTitle = data.title;
+    }).catch((err)=>{
+        console.log(err);
+        
+        res.status(500).json({
+            message: '서버 오류',
+            data: false
+        });
+    });
+
+    await model.ConfUser.findOne({
+        where : {
+            email : userEmail,
+            confTitle : confTitle,
+            projectId : projectId
+        }
+    }).then((data)=>{
+        if(!data){
+            res.status(202).json({
+                message: '회의 중인 사용자 아님',
+                data: false
+            });
+        }
+        if(data.isConfYn=='N'){
+            res.status(202).json({
+                message: '이미 나간 사용자',
+                data: false
+            });
+        }
+        model.ConfUser.update({
+            isConfYn: "N"
+        }, {
+            where: {
+                email: userEmail,
+                projectId: projectId,
+                confTitle: confTitle
+            }
+        }).then((result)=>{
+            console.log(result);
+            //TODO: 이거 해야해 res 반환해주기
+        });
+    }).catch((err)=>{
+        console.log(err);
+        
+        res.status(500).json({
+            message: '서버 오류',
+            data: false
+        });
+    });
 };
