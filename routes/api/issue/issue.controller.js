@@ -2,6 +2,11 @@ const model = require('../../../models');
 const model_mg = require('../../../models_mg');
 require("dotenv").config({ path: __dirname + "\\" + ".env" });
 
+async function asyncForEach(array, callback) {
+    for (let index = 0; index < array.length; index++) {
+      await callback(array[index], index, array);
+    }
+}
 
 /*
     ****< 이슈 생성 >****
@@ -10,10 +15,11 @@ require("dotenv").config({ path: __dirname + "\\" + ".env" });
         projectId,
         title,
         dDay,
+        dTime,
         content,
         isConfScheduled,
         attachment,
-        dept,
+        // dept,
         username,
         usernameEn,
         userImg
@@ -26,14 +32,17 @@ exports.createIssue = async (req, res, next) => {
     try {
         var projectId = req.body.projectId;
         var title = req.body.title || 'Untitled';
-        var dDay = req.body.dDay || Date.now();
+        var dDay = req.body.dDay || null;
+        var dTime = req.body.dTime || null;
         var content = req.body.content || '';
         var isConfScheduled = req.body.isConfScheduled;
         var attachment = req.body.attachment || '';
-        var dept = req.body.dept || '';
+        var dept;
         var writerName = req.body.username;
         var writerNameEn = req.body.usernameEn;
         var writerImg = req.body.userImg;
+
+        var projectName;
     } catch {
         res.status(400).json({
             message: 'Please check Params',
@@ -41,10 +50,47 @@ exports.createIssue = async (req, res, next) => {
         });
     }
 
+    // FIXME: join 가능하게 고치고 한번만 쿼리
+    // FIXME: ProjectUser 테이블에 ProjectId 필드 추가
+    // 유저 정보, 속한 부서 가져오기(일단 부서만 구현)
+    await model_mg.Project.findById(projectId, (err, project) => {
+        if (err) {
+            res.status(202).json({
+                message: "프로젝트 이름 조회 중 에러 발생",
+                data: false
+            });
+        }
+
+        console.log('projectName -*-*-> '+project.name);
+        projectName = project.name;
+    });
+
+    await model.ProjectUser.findOne({
+        where: {email: req.user.email, projectName: projectName}
+    }).then((project) => {
+        if (!project) {
+            res.status(202).json({
+                message: '부서 가져오기 실패',
+                data: false
+            });
+        }
+
+        try {
+            dept = project.dataValues.projectRole;
+            console.log('projectRole -*-*-> '+dept);
+        } catch(err) {
+            res.status(202).json({
+                message: '부서가 설정되지 않은 사용자',
+                data: false
+            });
+        }
+    });
+
     // 이슈 카드를 생성
     await model_mg.Issue.task.create({
         title: title,
         dDay: dDay,
+        dTime: dTime,
         content: content,
         isConfScheduled: isConfScheduled,
         attachment: attachment,
@@ -219,56 +265,60 @@ exports.deleteTask = async (req, res, next) => {
 }
 
 /* 
-    ****< 이슈 상태 변경 >****
-    POST /api/issue/changestatus
+    ****< 이슈 순서, 상태 저장 >****
+    POST /api/issue/savestatus
     {
-        taskId,
-        exStatusId,
-        newStatusId
+        columnData
     }
 */
-exports.changeStatus = async (req, res, next) => {
+exports.saveStatus = async (req, res, next) => {
     try {
-        var taskId = req.body.taskId;
-        var exStatusId = req.body.exStatusId;
-        var newStatusId = req.body.newStatusId;
+        var columnData = req.body.columnData;
     } catch (err) {
-        res.status(204).json({
-            message: "Please check Params",
+        res.status(400).json({
+            message: "Bad Request",
             data: false
         });
     }
 
-    // 이전 상태에서 제거
-    await model_mg.Issue.column.update(
-        { _id: exStatusId },
-        { $pull: { taskIds: taskId }}
-    ).then((result) => {
-        if (!result) {
-            res.status(200).json({
-                message: '이슈 상태변경 실패',
-                data: false
-            });
-        }
-    });
+    console.log(columnData);
 
-    // 새로운 상태로 업데이트
-    await model_mg.Issue.column.update(
-        { _id: newStatusId },
-        { $push: { taskIds: taskId }}
-    ).then((result) => {
-        if (!result) {
-            res.status(200).json({
-                message: '이슈 상태변경 실패',
-                data: false
-            });
-        }
+    var statusList = ['TODO', 'DOING', 'DONE'];
+    var successList = [];
 
-        res.status(200).json({
-            message: '이슈 상태변경 성공',
-            data: false
+    await asyncForEach(statusList, async (status) => {
+        var columnId = columnData[status]._id;
+        var taskIds = columnData[status].taskIds;
+
+        await model_mg.Issue.column.update(
+            { _id: columnId },
+            { $set: { taskIds: taskIds }}
+        ).then((result) => {
+            if (!result) {
+                res.status(204).json({
+                    message: '이슈 상태 반영 실패',
+                    data: false
+                });
+            }
+
+            console.dir('status =#=#=> '+status); //
+            successList.push(status);
+        }).catch((err) => {
+            console.log(err);
         });
     });
+
+    if (successList.length === 3) {
+        res.status(200).json({
+            message: '이슈 상태 반영 성공',
+            data: columnData
+        });
+    } else {
+        res.status(204).json({
+            message: '이슈 상태 반영에 성공한 게 맞을까 아닐까 사실 나도 잘 몰라ㅎㅎ',
+            data: false
+        });
+    }
 };
 
 /*

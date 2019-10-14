@@ -16,4 +16,13 @@ db.User = require('./user')(sequelize, Sequelize);
 db.ProjectUser = require('./project_user')(sequelize, Sequelize);
 db.ConfUser = require('./conf_user')(sequelize, Sequelize);
 
+db.ProjectUser.belongsTo(db.User, {foreignKey: 'email'});
+
+db.User.associate = (models) => {
+  db.User.hasMany(models.ProjectUser, {
+      foreignKey: 'email',
+      onDelete: 'cascade'
+  });
+};
+
 module.exports = db;

@@ -11,7 +11,7 @@ const passportJWT = passport.authenticate('jwt', { session: false });
 router.get('/:projectId', passportJWT, controller.getList);
 router.post('/create/task', passportJWT, controller.createIssue);
 router.post('/delete', passportJWT, controller.deleteTask);
-router.post('/changestatus', passportJWT, controller.changeStatus);
+router.post('/savestatus', passportJWT, controller.saveStatus);
 
 // comment
 router.get('/get/:id', passportJWT, controller.getComments);
