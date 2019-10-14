@@ -617,8 +617,9 @@ exports.exitConf = async(req, res, next) => {
         });
     }
 
-    await model_mg.Conf_room.find({
-        _id : confId
+    await model_mg.Conf_room.findOne({
+        _id : confId,
+        projectId : projectId
     }).then((data)=>{
         if(!data){
             res.status(202).json({
@@ -665,7 +666,12 @@ exports.exitConf = async(req, res, next) => {
             }
         }).then((result)=>{
             console.log(result);
-            //TODO: 이거 해야해 res 반환해주기
+            res.status(201).json({
+                message: '회의실 나감(update성공)',
+                data: {
+                    email : userEmail
+                }
+            });
         });
     }).catch((err)=>{
         console.log(err);
