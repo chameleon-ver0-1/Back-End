@@ -285,7 +285,7 @@ exports.includedList = async (req, res, next) => {
             data: false
         });
     }
-
+    
     //나를 포함하는 회의실 찾기
     await model_mg.Conf_room.find({
         members: {
@@ -303,7 +303,9 @@ exports.includedList = async (req, res, next) => {
                 });
             }
             results.forEach(async(result) => {
-                if (result.startTime > new Date().getTime()) {
+                console.log(result.endTime);
+                
+                if (result.startTime > new Date().getTime() && !(result.endTime)) {
                     var confYEmail = [];
                     await model.ConfUser.findAll({
                         where: {
@@ -376,7 +378,7 @@ exports.includedList = async (req, res, next) => {
     {
     }
 */
-//TODO: 회의실에 들어갈때 conf_user에 isConfYn 바꾸는 작업 필요(N-->Y))
+//회의실에 들어갈때 conf_user에 isConfYn 바꾸는 작업 필요(N-->Y))
 exports.enterConf = async(req, res, next) => {
     var confId;
     var projectId;
@@ -398,6 +400,8 @@ exports.enterConf = async(req, res, next) => {
             data: false
         });
     }
+    //FIXME: 회의록에 끝나는시간이 있는 회의실은 들어갈수없음을 표현하고싶음
+
 
     await model_mg.Conf_room.findOne({
         _id: confId
@@ -588,15 +592,18 @@ exports.memberList = (req, res, next) => {
 };
 
 /*
-    GET /api/conf_room/endConf/:projectId/:confId
+    POST /api/conf_room/endConf/:projectId/:confId
     {
     }
 */
-//TODO: 회의 종료 API --> 상태변경 & 회의록 생성 & endTime 지정 (회읙 개설자만 누를 수 있음)
-exports.endConf = (req, res, next) => {
+//회의 종료 API --> 상태변경 & 회의록 생성 & endTime 지정 (회읙 개설자만 누를 수 있음)
+exports.endConf = async(req, res, next) => {
     var confId;
     var projectId;
-    var confLeaderEmail;
+    var title;
+    var startTime;
+    var members = [];
+    var mainTopics = [];
     try {
         projectId = req.params.projectId;
         confId = req.params.confId;
@@ -608,17 +615,128 @@ exports.endConf = (req, res, next) => {
             data : false
         });
     }
+    //회의실 정보 변수에 저장
+    //(title, startTime, members, mainTopics, projectId)
+    await model_mg.Conf_room.findOne({
+        _id : confId,
+        projectId : projectId
+    }).then((result)=>{
+        if(!result){
+            res.status(202).json({
+                message: '존재하지 않는 회의실',
+                data: false
+            });
+        }
+        title = result.title;
+        startTime = result.startTime;
+        members = result.members;
+        mainTopics = result.mainTopics;
+    }).catch((err)=>{
+        console.log(err);
+        
+        res.status(500).json({
+            message: '서버 오류',
+            data: false
+        });
+    });
+    //FIXME: 속성으로 endTime이 들어가 있지 않음
+    await model_mg.Conf_room.update({ 
+        endTime: new Date().getTime()
+    }, { 
+        $set: { 
+            title : title,
+            projectId : projectId
+         } 
+    }).then((result)=>{
+        if(!result){
+            res.status(202).json({
+                message: '회의실 DB 수정 실패',
+                data: false
+            });
+        }
+        console.log(result);
+        
+    });
 
-    //TODO: 상태변경
+    //상태변경 --> 회의중인 사람들 모두 상태변경
+    await model.ConfUser.findAll({
+        where : {
+            confTitle : title,
+            projectId : projectId
+        }
+    }).then((results)=>{
+        if(!results){
+            res.status(202).json({
+                message: '회의중인 사람 없음',
+                data: false
+            });
+        }
+        results.forEach((result)=>{
+            console.log(result.email);
+            if(result.isConfYn=='Y'){
+                model.ConfUser.update({
+                    isConfYn: "N"
+                }, {
+                    where: {
+                        email: result.email,
+                        projectId: projectId,
+                        confTitle: title
+                    }
+                }).then((result)=>{
+                    if(!result){
+                        res.status(202).json({
+                            message: '상태 변경 실패(update 실패)',
+                            data: false
+                        });
+                    }
+                });
+            }
+        });
+    }).catch((err)=>{
+        console.log(err);
+        
+        res.status(500).json({
+            message: '서버 오류',
+            data: false
+        });
+    });
+
+    //conf_log DB 생성
+    await model_mg.Conf_log.conf_logs.create({
+        title : title,
+        startTime : startTime,
+        endTime : new Date().getTime(),
+        members : members,
+        mainTopics : mainTopics,
+        projectId : projectId
+    }).then((result)=>{
+        if(!result){
+            res.status(202).json({
+                message: '회의록 DB 생성 실패',
+                data: false
+            });
+        }
+        res.status(201).json({
+            message: '회의 종료 성공 -> 회의록 정보',
+            data: result
+        });
+    }).catch((err)=>{
+        console.log(err);
+        
+        res.status(500).json({
+            message: '서버 오류',
+            data: false
+        });
+    });
 
 };
 
 /*
-    GET /api/conf_room/exitConf/:projectId/:confId
+    POST /api/conf_room/exitConf/:projectId/:confId
     {
     }
 */
-//TODO: 회의 나가는 API --> 한사람이 나가는 API (단순 상태변경) 
+//회의 나가는 API --> 한사람이 나가는 API (단순 상태변경) 
 exports.exitConf = async(req, res, next) => {
     var confId;
     var projectId;
