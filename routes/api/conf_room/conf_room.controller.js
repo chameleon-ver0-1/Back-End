@@ -400,8 +400,6 @@ exports.enterConf = async(req, res, next) => {
             data: false
         });
     }
-    //FIXME: 회의록에 끝나는시간이 있는 회의실은 들어갈수없음을 표현하고싶음
-
 
     await model_mg.Conf_room.findOne({
         _id: confId
@@ -409,6 +407,12 @@ exports.enterConf = async(req, res, next) => {
         if(!result){
             res.status(400).json({
                 message: '없는 회의실',
+                data: false
+            });
+        }
+        if(result.endTime){
+            res.status(400).json({
+                message: '종료된 회의실',
                 data: false
             });
         }
@@ -620,106 +624,116 @@ exports.endConf = async(req, res, next) => {
     await model_mg.Conf_room.findOne({
         _id : confId,
         projectId : projectId
-    }).then((result)=>{
+    }).then(async(result)=>{
         if(!result){
             res.status(202).json({
                 message: '존재하지 않는 회의실',
                 data: false
             });
         }
-        title = result.title;
-        startTime = result.startTime;
-        members = result.members;
-        mainTopics = result.mainTopics;
-    }).catch((err)=>{
-        console.log(err);
-        
-        res.status(500).json({
-            message: '서버 오류',
-            data: false
-        });
-    });
-    //FIXME: 속성으로 endTime이 들어가 있지 않음
-    await model_mg.Conf_room.update({ 
-        endTime: new Date().getTime()
-    }, { 
-        $set: { 
-            title : title,
-            projectId : projectId
-         } 
-    }).then((result)=>{
-        if(!result){
+        else if(result.endTime){
             res.status(202).json({
-                message: '회의실 DB 수정 실패',
+                message: '이미 종료된 회의실',
                 data: false
             });
         }
-        console.log(result);
-        
-    });
+        else{
+            title = result.title;
+            startTime = result.startTime;
+            members = result.members;
+            mainTopics = result.mainTopics;
 
-    //상태변경 --> 회의중인 사람들 모두 상태변경
-    await model.ConfUser.findAll({
-        where : {
-            confTitle : title,
-            projectId : projectId
-        }
-    }).then((results)=>{
-        if(!results){
-            res.status(202).json({
-                message: '회의중인 사람 없음',
-                data: false
+            await model_mg.Conf_room.update({ 
+                title : title,
+                projectId : projectId
+            }, { 
+                $set: { 
+                    endTime : new Date().getTime()
+                 } 
+            }).then((result)=>{
+                if(!result){
+                    res.status(202).json({
+                        message: '회의실 DB 수정 실패',
+                        data: false
+                    });
+                }
+                console.log(result);
+                
             });
-        }
-        results.forEach((result)=>{
-            console.log(result.email);
-            if(result.isConfYn=='Y'){
-                model.ConfUser.update({
-                    isConfYn: "N"
-                }, {
-                    where: {
-                        email: result.email,
-                        projectId: projectId,
-                        confTitle: title
-                    }
-                }).then((result)=>{
-                    if(!result){
-                        res.status(202).json({
-                            message: '상태 변경 실패(update 실패)',
-                            data: false
+        
+            //상태변경 --> 회의중인 사람들 모두 상태변경
+            await model.ConfUser.findAll({
+                where : {
+                    confTitle : title,
+                    projectId : projectId
+                }
+            }).then((results)=>{
+                if(!results){
+                    res.status(202).json({
+                        message: '회의중인 사람 없음',
+                        data: false
+                    });
+                }
+                results.forEach((result)=>{
+                    console.log(result.email);
+                    if(result.isConfYn=='Y'){
+                        model.ConfUser.update({
+                            isConfYn: "N"
+                        }, {
+                            where: {
+                                email: result.email,
+                                projectId: projectId,
+                                confTitle: title
+                            }
+                        }).then((result)=>{
+                            if(!result){
+                                res.status(202).json({
+                                    message: '상태 변경 실패(update 실패)',
+                                    data: false
+                                });
+                            }
                         });
                     }
                 });
-            }
-        });
-    }).catch((err)=>{
-        console.log(err);
+            }).catch((err)=>{
+                console.log(err);
+                
+                res.status(500).json({
+                    message: '서버 오류',
+                    data: false
+                });
+            });
         
-        res.status(500).json({
-            message: '서버 오류',
-            data: false
-        });
-    });
-
-    //conf_log DB 생성
-    await model_mg.Conf_log.conf_logs.create({
-        title : title,
-        startTime : startTime,
-        endTime : new Date().getTime(),
-        members : members,
-        mainTopics : mainTopics,
-        projectId : projectId
-    }).then((result)=>{
-        if(!result){
-            res.status(202).json({
-                message: '회의록 DB 생성 실패',
-                data: false
+            //conf_log DB 생성
+            await model_mg.Conf_log.conf_logs.create({
+                title : title,
+                startTime : startTime,
+                endTime : new Date().getTime(),
+                members : members,
+                mainTopics : mainTopics,
+                projectId : projectId
+            }).then((result)=>{
+                if(!result){
+                    res.status(202).json({
+                        message: '회의록 DB 생성 실패',
+                        data: false
+                    });
+                }
+                else{
+                    res.status(201).json({
+                    message: '회의 종료 성공 -> 회의록 정보',
+                    data: result
+                    });
+                }
+            }).catch((err)=>{
+                console.log(err);
+                
+                res.status(500).json({
+                    message: '서버 오류',
+                    data: false
+                });
             });
         }
-        res.status(201).json({
-            message: '회의 종료 성공 -> 회의록 정보',
-            data: result
-        });
     }).catch((err)=>{
         console.log(err);
         
