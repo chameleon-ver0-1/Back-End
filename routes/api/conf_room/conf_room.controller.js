@@ -382,7 +382,7 @@ exports.enterConf = async(req, res, next) => {
     var projectId;
     var confTitle;
     var mainTopics;
-    var members;
+    var members = [];
     var startTime;
     var email;
     var title;
@@ -438,7 +438,7 @@ exports.enterConf = async(req, res, next) => {
                     data: false
                 });
             }
-            console.log(data.email);
+            // console.log(data.email);
             confLeaderEmail = data.email;   
         }); 
     });
@@ -449,7 +449,26 @@ exports.enterConf = async(req, res, next) => {
         if (result) {
             mainTopics = result.mainTopics;
             confTitle = result.title;
-            members = result.members;
+            result.members.forEach((m)=>{
+                // console.log(member);
+                var member = {};
+                member.email = m;
+                model.User.findOne({
+                    where:{email:m}
+                }).then((data)=>{
+                    if(!data){
+                        res.status(202).json({
+                            message: '존재하지 않는 사용자가 참여자로 있음',
+                            data: false
+                        });
+                    }
+                    console.log(data.name);
+                    
+                    member.name = data.name;
+                    member.nameEn = data.name_en;
+                    members.push(member);
+                });
+            });
             startTime = result.startTime;
             model.ConfUser.update({
                 isConfYn: "Y"
@@ -461,7 +480,7 @@ exports.enterConf = async(req, res, next) => {
                 }
             }).then((result) => {
                 if (result) {
-                    console.log(confTitle);
+                    // console.log(confTitle);
 
                     model.ConfUser.findAll({
                         where: {
