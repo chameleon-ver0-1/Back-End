@@ -9,7 +9,7 @@ conf_logs = (mongoose) => {
         mainTopics : [String],
         totalLogFile : String,//정제되지 않은(전체 회의기록) txt 파일이 있는 경로
         projectId : { type: mongoose.Schema.Types.ObjectId, ref: 'project'}, 
-        details : { type: mongoose.Schema.Types.ObjectId, ref: 'conf_log_detail'}
+        detailId : { type: mongoose.Schema.Types.ObjectId, ref: 'conf_log_detail'}
     });
     schema.plugin(mongoosePaginate);
     return mongoose.model('conf_log', schema );
@@ -18,7 +18,10 @@ conf_logs = (mongoose) => {
 conf_log_detail = (mongoose) => { return mongoose.model('conf_log_detail', 
     mongoose.Schema({
         keywords : [String],
-        contents : [String] //주제별 요약된 회의내용
+        contents : {
+            type: Map, 
+            of: String // Values must be strings
+          } //주제별 요약된 회의내용
     })
 )};
 

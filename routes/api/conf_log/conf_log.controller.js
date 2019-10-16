@@ -153,8 +153,72 @@ exports.search = async (req, res, next) => {
         
     }
 */
-//TODO: 키워드를 key,value로 넘겨줄건지 아니면 그냥 문자배열해서 임의로 값의 차이를 둘건지
-//TODO: 주제별 요약이면 첫번째 배열은 첫번째 주제 뭐 이렇게하는건가 -> 이것도 key value 필요없는지
-exports.detail = async (req, res, next) => {
 
+exports.detail = async (req, res, next) => {
+    var projectId;
+    var detailId;
+    var title;
+    var startTime;
+    var endTime;
+    try {
+        projectId = req.params.projectId;
+        detailId = req.params.detailId;
+
+        var projectLeader = req.user.email;
+        projectParticipants.push(projectLeader);
+    } catch (err) {
+        console.log(err);
+        res.status(400).json({
+            message: 'Please check Params',
+            data: false
+        });
+    }
+
+    await model_mg.Conf_log.conf_logs.findOne({
+        detailId : detailId
+    }).then((result)=>{
+        if(!result){
+            res.status(202).json({
+                message: '존재하지않는 회의록',
+                data: false
+            });
+        }
+        title = result.title;
+        startTime = result.startTime;
+        endTime = result.endTime;
+    }).catch((err)=>{
+        console.log(err);
+        res.status(500).json({
+            message: '서버 오류',
+            data: false
+        });
+    });
+
+    await model_mg.Conf_log.conf_log_detail.findOne({
+        _id : detailId
+    }).then((result)=>{
+        if(!result){
+            res.status(202).json({
+                message: '존재하지않는 회의록',
+                data: false
+            });
+        }
+        //TODO: title, startTime, endTime, keyword, contents
+        res.status(201).json({
+            message: '회의록 상세보기',
+            data: {
+                title : title,
+                startTime : startTime,
+                endTime : endTime,
+                keyword : result.keyword,
+                contents : result.contents
+            }
+        });
+    }).catch((err)=>{
+        console.log(err);
+        res.status(500).json({
+            message: '서버 오류',
+            data: false
+        });
+    });
 };
