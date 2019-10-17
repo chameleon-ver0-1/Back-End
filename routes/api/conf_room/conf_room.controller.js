@@ -164,7 +164,7 @@ exports.memberCheck = async (req, res, next) => {
     }).then((result) => {
         if (result) {
             projectName = result.name;
-            console.log(result.roles);
+            // console.log(result.roles);
 
             if (!result.roles) {
                 roleExist = false;
@@ -213,7 +213,7 @@ exports.memberCheck = async (req, res, next) => {
                                 member.email = result.email;
                                 member.role = result.projectRole;
                                 searchList.push(member);
-                                console.log(searchList);
+                                // console.log(searchList);
                                 i = i + 1;
                             } else {
                                 i = i + 1;
@@ -253,10 +253,108 @@ exports.memberCheck = async (req, res, next) => {
     {
     }
 */
-exports.proceedList = (req, res, next) => {
+exports.proceedList = async(req, res, next) => {
     //TODO: 현재시간을 기준으로 끝나는시간이 null이고 시작시간이 현재시간보다 이전인 것에 해당하는 회의실 목록만 보여주기
-    console.log(new Date().getTime());
+    var projectId;
+    var myEmail;
+    var confTitles = [];
+    var confMember; //참여중인 멤버 수
+    var resultData = [];
+    var confRoomData = []; //회의이름, 개설자, 참여중인 사람 수 
 
+    try {
+        projectId = req.params.projectId;
+        myEmail = req.user.email;
+    } catch (err) {
+        console.log(err);
+        res.status(400).json({
+            message: 'Please check Params',
+            data: false
+        });
+    }
+    //나를 포함하는 회의실 찾기
+    await model_mg.Conf_room.find({
+        projectId: projectId
+    }).then((results) => {
+        if (results) {
+            console.log(results.length);
+            var i = 0;
+            if (results.length === 0) {
+                res.status(202).json({
+                    message: '결과 없음',
+                    data: []
+                });
+            }
+            results.forEach(async (result) => {
+                console.log(result.endTime);
+
+                if (result.startTime < new Date().getTime() && !(result.endTime)) {
+                    var confYEmail = [];
+                    await model.ConfUser.findAll({
+                        where: {
+                            projectId: projectId,
+                            confTitle: result.title,
+                            isConfYn: "Y"
+                        }
+                    }).then((result) => {
+                        // console.log(result);
+                        if (result) {
+                            result.forEach((data) => {
+                                confYEmail.push(data.email);
+                            });
+                        }
+                    });
+                    //예정된 회의실 찾음
+                    await model.ConfUser.findOne({
+                        where: {
+                            confTitle: result.title,
+                            isAdminYn: "Y"
+                        }
+                    }).then((data) => {
+                        model.User.findOne({
+                            where: {
+                                email: data.email
+                            }
+                        }).then((data) => {
+                            i = i + 1;
+                            resultData.push({
+                                startTime: result.startTime,
+                                id: result._id,
+                                title: result.title,
+                                // members: result.members,
+                                membersTotal: result.members.length,
+                                // isConfYMembers: confYEmail,
+                                isConfYMembersTotal: confYEmail.length,
+                                confLeaderName: data.name,
+                                confLeaderName_en : data.name_en
+                            });
+
+                            if (i === results.length) {
+                                console.log(i);
+                                res.status(200).json({
+                                    message: '진행 중인 회의 목록 조회 성공',
+                                    data: resultData
+                                });
+                            }
+                        });
+                    });
+                } else {
+                    i = i + 1;
+                }
+            });
+        } else {
+            res.status(202).json({
+                message: '결과 없음',
+                data: false
+            });
+        }
+    }).catch((err) => {
+        console.log(err);
+        res.status(500).json({
+            message: '서버 오류',
+            data: false
+        });
+    });
 };
 
 /*
@@ -276,7 +374,6 @@ exports.includedList = async (req, res, next) => {
 
     try {
         projectId = req.params.projectId;
-        startTime = req.body.startTime;
         myEmail = req.user.email;
     } catch (err) {
         console.log(err);
@@ -338,11 +435,12 @@ exports.includedList = async (req, res, next) => {
                                 startTime: result.startTime,
                                 id: result._id,
                                 title: result.title,
-                                members: result.members,
+                                // members: result.members,
                                 membersTotal: result.members.length,
-                                isConfYMembers: confYEmail,
+                                // isConfYMembers: confYEmail,
                                 isConfYMembersTotal: confYEmail.length,
-                                adminEmail: data.name
+                                confLeaderName: data.name,
+                                confLeaderName_en: data.name_en
                             });
 
                             if (i === results.length) {
@@ -550,16 +648,20 @@ exports.enterConf = async (req, res, next) => {
 };
 
 /*
-    GET /api/conf_room/memberList/:projectId/:confId
+    POST /api/conf_room/memberList/:projectId/:confId
     {
     }
 */
 //FIXME: 동그라미에서 3/4 누르면 회의 참여자들 목록 보여주기
-exports.memberList = (req, res, next) => {
+exports.memberList = async(req, res, next) => {
     var confId;
-    var members = [];
+    var projectId;
+    var members;
+    var membersInfo = [];
+    var confTitle;
     try {
         confId = req.params.confId;
+        projectId = req.params.projectId;
     } catch (err) {
         console.log(err);
         res.status(400).json({
@@ -568,20 +670,14 @@ exports.memberList = (req, res, next) => {
         });
     }
 
-    model_mg.Conf_room.findOne({
-        _id: confId
+    await model_mg.Conf_room.findOne({
+        _id: confId,
+        projectId: projectId
     }).then((result) => {
         if (result) {
-            // console.log(result);
-            result.members.forEach((member) => {
-                var memberObject = {};
-                memberObject.member = member;
-                members.push(memberObject);
-            });
-            res.status(201).json({
-                message: '참여자 목록',
-                data: members
-            });
+            // console.log(result.members);
+            confTitle = result.title;
+            members = result.members;
         } else {
             res.status(202).json({
                 message: '없는 회의',
@@ -595,6 +691,54 @@ exports.memberList = (req, res, next) => {
             data: false
         });
     });
+
+    await members.forEach((member)=>{
+        model.User.findOne({
+            where:{
+                email : member
+            }
+        }).then((result)=>{
+            if(!result){
+                res.status(202).json({
+                    message: '참여자 정보 가져올 수 없음',
+                    data: false
+                });
+            }
+            model.ConfUser.findOne({
+                where:{
+                    confTitle : confTitle,
+                    projectId : projectId,
+                    email : member
+                }
+            }).then((data)=>{
+                if(!data){
+                    res.status(202).json({
+                        message: 'DB 오류',
+                        data: false
+                    });
+                }
+                var memberInfo = {};
+                memberInfo.name = result.name;
+                memberInfo.name_en = result.name_en;
+                memberInfo.isConfYn = data.isConfYn;
+                membersInfo.push(memberInfo);
+    
+                if(members.length==membersInfo.length){
+                    res.status(201).json({
+                        message: '참여자 목록',
+                        data: membersInfo
+                    });
+                }
+            });
+        }).catch((err)=>{
+            console.log(err);
+            res.status(500).json({
+                message: '서버 오류',
+                data: false
+            });
+        });
+    });
+
 };
 
 /*
@@ -914,7 +1058,8 @@ exports.confInfo = async (req, res, next) => {
                             data: false
                         });
                     }
-                    console.log(data.name);
+                    // console.log(data.name);
+
 
                     member.name = data.name;
                     member.nameEn = data.name_en;
