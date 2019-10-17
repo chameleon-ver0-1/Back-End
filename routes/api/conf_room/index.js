@@ -18,7 +18,7 @@ router.get('/includedList/:projectId', passportJWT, controller.includedList);
 //회의에 들어갈 때 user의 isConfYn 변경
 router.get('/enterConf/:projectId/:confId', passportJWT, controller.enterConf);
 //FIXME: 3/4누를때 member목록 
-router.get('/memberList/:projectId/:confId', passportJWT, controller.memberList);
+router.post('/memberList/:projectId/:confId', passportJWT, controller.memberList);
 //회의완전종료 - 개설자만 가능
 router.post('/endConf/:projectId/:confId', passportJWT, controller.endConf);
 //회의나갈때 - 단순 상태변경
