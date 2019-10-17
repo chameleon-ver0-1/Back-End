@@ -153,7 +153,7 @@ exports.search = async (req, res, next) => {
         
     }
 */
-
+//TODO: conf_log의 detailId도 update해줘야함.
 exports.detail = async (req, res, next) => {
     var projectId;
     var detailId;
@@ -163,9 +163,6 @@ exports.detail = async (req, res, next) => {
     try {
         projectId = req.params.projectId;
         detailId = req.params.detailId;
-
-        var projectLeader = req.user.email;
-        projectParticipants.push(projectLeader);
     } catch (err) {
         console.log(err);
         res.status(400).json({
@@ -210,7 +207,7 @@ exports.detail = async (req, res, next) => {
                 title : title,
                 startTime : startTime,
                 endTime : endTime,
-                keyword : result.keyword,
+                keyword : result.keywords,
                 contents : result.contents
             }
         });
