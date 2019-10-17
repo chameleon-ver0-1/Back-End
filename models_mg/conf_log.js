@@ -17,11 +17,8 @@ conf_logs = (mongoose) => {
 
 conf_log_detail = (mongoose) => { return mongoose.model('conf_log_detail', 
     mongoose.Schema({
-        keywords : [String],
-        contents : {
-            type: Map, 
-            of: String // Values must be strings
-          } //주제별 요약된 회의내용
+        keywords : [Object],
+        contents : [Object]
     })
 )};
 
