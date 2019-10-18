@@ -153,7 +153,6 @@ exports.search = async (req, res, next) => {
         
     }
 */
-//TODO: conf_log의 detailId도 update해줘야함.
 exports.detail = async (req, res, next) => {
     var projectId;
     var detailId;
@@ -217,5 +216,68 @@ exports.detail = async (req, res, next) => {
             message: '서버 오류',
             data: false
         });
+    });
+};
+
+/*
+    post /api/conf_log/create/:projectId/:confLogId
+    {
+        keywords
+        cotents
+    }
+*/
+exports.create = async (req, res, next) => {
+    var projectId;
+    var confLogId;
+    var keywords;
+    var contents;
+    try {
+        projectId = req.params.projectId;
+        confLogId = req.params.confLogId;
+        keywords = req.body.keywords;
+        contents = req.body.contents;
+    } catch (err) {
+        console.log(err);
+        res.status(400).json({
+            message: 'Please check Params',
+            data: false
+        });
+    }
+
+    await model_mg.Conf_log.conf_log_detail.create({
+        keywords : keywords,
+        contents : contents
+    }).then((result)=>{
+        if(!result){
+            res.status(202).json({
+                message: '회의록(상세) 생성 실패',
+                data: false
+            });
+        }
+        console.log(result._id);
+        model_mg.Conf_log.conf_logs.update({
+            _id : confLogId
+        }, {
+            $set: {
+                detailId: result._id
+            },
+        }).then((data)=>{
+            if(!data){
+                res.status(202).json({
+                    message: 'DB 오류',
+                    data: false
+                });
+            }
+            res.status(201).json({
+                message: '회의록(상세) 생성 성공',
+                data: result
+            });
+        });
+    }).catch((err)=>{
+        console.log(err);
+        res.status(500).json({
+            message: '서버 오류',
+            data: false
+        }); 
     });
 };
