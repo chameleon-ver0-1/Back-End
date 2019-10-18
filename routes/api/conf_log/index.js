@@ -13,5 +13,7 @@ router.get('/detail/:projectId/:detailId', passportJWT, controller.detail);
 router.get('/list/:projectId', passportJWT, controller.list);
 //회의록 목록 검색
 router.get('/search/:projectId', passportJWT, controller.search);
+//회의록 생성
+router.post('/create/:projectId/:confLogId', passportJWT, controller.create);
 
 module.exports = router;
