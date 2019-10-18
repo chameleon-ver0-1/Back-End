@@ -21,6 +21,8 @@ router.get('/enterConf/:projectId/:confId', passportJWT, controller.enterConf);
 router.post('/memberList/:projectId/:confId', passportJWT, controller.memberList);
 //회의완전종료 - 개설자만 가능
 router.post('/endConf/:projectId/:confId', passportJWT, controller.endConf);
+//회의완전종료 - 개설자만 가능 (소영)
+router.post('/endConfer/:projectId/:confId', passportJWT, controller.endConfer);
 //회의나갈때 - 단순 상태변경
 router.post('/exitConf/:projectId/:confId', passportJWT, controller.exitConf);
 //회의정보 

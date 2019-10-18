@@ -1127,7 +1127,7 @@ exports.confInfo = async (req, res, next) => {
     }
 */
 //회의 종료 API --> 상태변경 & 회의록 생성 & endTime 지정 (회읙 개설자만 누를 수 있음)
-exports.endConf = async (req, res, next) => {
+exports.endConfer = async (req, res, next) => {
     var confId;
     var projectId;
     var title;
