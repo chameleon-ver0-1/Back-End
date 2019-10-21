@@ -44,7 +44,7 @@ exports.list = async (req, res, next) => {
                     endTime : confLog.endTime,
                     mainTopics : confLog.mainTopics,
                     totalLogfile : confLog.totalLogfile,
-                    details : confLog.details
+                    detailId : confLog.detailId
                 });
             });
             if (confLogs.length === result.docs.length) {
