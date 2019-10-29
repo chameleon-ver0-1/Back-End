@@ -199,15 +199,29 @@ exports.detail = async (req, res, next) => {
                 data: false
             });
         }
-        //TODO: title, startTime, endTime, keyword, contents
+        var keywords = [];
+        var contents = [];
+        result.keywords.forEach((data)=>{
+            var keyword = [];
+            keyword.push(data.keyword);
+            keyword.push(data.value);
+            keywords.push(keyword);
+        });
+        result.contents.forEach((data)=>{
+            var content = [];
+            content.push(data.topic);
+            content.push(data.content);
+            contents.push(content);
+        });
+
         res.status(201).json({
             message: '회의록 상세보기',
             data: {
                 title : title,
                 startTime : startTime,
                 endTime : endTime,
-                keyword : result.keywords,
-                contents : result.contents
+                keywords : keywords,
+                contents : contents
             }
         });
     }).catch((err)=>{
