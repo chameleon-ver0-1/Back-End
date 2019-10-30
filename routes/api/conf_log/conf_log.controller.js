@@ -207,12 +207,12 @@ exports.detail = async (req, res, next) => {
             keyword.push(data.value);
             keywords.push(keyword);
         });
-        result.contents.forEach((data)=>{
-            var content = [];
-            content.push(data.topic);
-            content.push(data.content);
-            contents.push(content);
-        });
+        // result.contents.forEach((data)=>{
+        //     var content = [];
+        //     content.push(data.topic);
+        //     content.push(data.content);
+        //     contents.push(content);
+        // });
 
         res.status(201).json({
             message: '회의록 상세보기',
@@ -221,7 +221,7 @@ exports.detail = async (req, res, next) => {
                 startTime : startTime,
                 endTime : endTime,
                 keywords : keywords,
-                contents : contents
+                contents : result.contents
             }
         });
     }).catch((err)=>{
