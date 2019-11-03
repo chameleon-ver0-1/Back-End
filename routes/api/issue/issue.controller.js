@@ -431,8 +431,8 @@ exports.getTitles = async (req, res, next) => {
 
         columns.forEach(column => {
             column.taskIds.forEach(task => {
-                console.log('task.status -> ' + task.status + ', task.title -> ' + task.title);
-                titles[task.status].push(task.title);
+                console.log('column.status -> ' + column.status + ', task.title -> ' + task.title);
+                titles[column.status].push(task.title);
             });
         });
     });
