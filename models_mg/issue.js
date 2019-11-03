@@ -1,6 +1,7 @@
 issue_column = (mongoose) => { return mongoose.model('column', 
     mongoose.Schema({
         status: String,
+        dept: String,
         taskIds: [{type: mongoose.Schema.Types.ObjectId, ref: 'task'}],
         projectId: {type: mongoose.Schema.Types.ObjectId, ref: 'project'},
     })
