@@ -134,27 +134,31 @@ exports.create = async (req, res, next) => {
         result = project;
         var statusList = ["TODO", "DOING", "DONE"]
 
-        statusList.forEach(status => {
-            model_mg.Issue.column.create({
-                status: status,
-                taskIds: [],
-                projectId: project.id
-            }).then((column) => {
-                if (!column)
-                    res.status(202).json({
-                        message: '이슈 컬럼 생성 오류',
+        projectRoles.forEach(role => {
+            statusList.forEach(status => {
+                model_mg.Issue.column.create({
+                    status: status,
+                    dept: role,
+                    taskIds: [],
+                    projectId: project.id
+                }).then((column) => {
+                    if (!column)
+                        res.status(202).json({
+                            message: '이슈 컬럼 생성 오류',
+                            data : false
+                        });
+    
+                    console.log(column);
+                }).catch((err) => {
+                    console.log(err);
+                    res.status(500).json({
+                        message: '서버 오류',
                         data : false
                     });
-
-                console.log(column);
-            }).catch((err) => {
-                console.log(err);
-                res.status(500).json({
-                    message: '서버 오류',
-                    data : false
                 });
             });
         });
+        
     }).catch((err) => {
         console.log(err);
         res.status(500).json({
