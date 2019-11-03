@@ -406,9 +406,9 @@ exports.getTitles = async (req, res, next) => {
     try {
         var projectId = req.params.projectId;
         var titles = {
-            'TODO': [],
-            'DOING': [],
-            'DONE': []
+            'TODO': Array(),
+            'DOING': Array(),
+            'DONE': Array()
         };
     } catch (err) {
         res.status(204).json({
