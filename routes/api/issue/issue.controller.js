@@ -279,6 +279,8 @@ exports.saveStatus = async (req, res, next) => {
         var columnId = columnData[status]._id;
         var taskIds = columnData[status].taskIds;
 
+        console.log('columnId => ' + columnId);
+
         await model_mg.Issue.column.update(
             { _id: columnId },
             { $set: { taskIds: taskIds }}
