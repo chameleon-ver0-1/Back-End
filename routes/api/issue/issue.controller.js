@@ -257,8 +257,7 @@ exports.deleteTask = async (req, res, next) => {
     ****< 이슈 순서, 상태 저장 >****
     POST /api/issue/savestatus
     {
-        columnData,
-        dept
+        columnData
     }
 */
 exports.saveStatus = async (req, res, next) => {
@@ -271,7 +270,7 @@ exports.saveStatus = async (req, res, next) => {
         });
     }
 
-    console.log(columnData);
+    console.log('Successfully get -> ' + columnData);
 
     var statusList = ['TODO', 'DOING', 'DONE'];
     var successList = [];
@@ -406,9 +405,9 @@ exports.getTitles = async (req, res, next) => {
     try {
         var projectId = req.params.projectId;
         var titles = {
-            'TODO': Array(),
-            'DOING': Array(),
-            'DONE': Array()
+            'TODO': [],
+            'DOING': [],
+            'DONE': []
         };
     } catch (err) {
         res.status(204).json({
@@ -428,8 +427,11 @@ exports.getTitles = async (req, res, next) => {
             });
         }
 
+        console.log("log ==> " + columns);
+
         columns.forEach(column => {
             column.taskIds.forEach(task => {
+                console.log('task.status -> ' + task.status + ', task.title -> ' + task.title);
                 titles[task.status].push(task.title);
             });
         });
