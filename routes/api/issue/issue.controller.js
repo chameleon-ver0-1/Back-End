@@ -263,14 +263,14 @@ exports.deleteTask = async (req, res, next) => {
 exports.saveStatus = async (req, res, next) => {
     try {
         var columnData = req.body.columnData;
+
+        console.log('Successfully get -> ' + columnData);
     } catch (err) {
         res.status(400).json({
             message: "Bad Request",
             data: false
         });
     }
-
-    console.log('Successfully get -> ' + columnData);
 
     var statusList = ['TODO', 'DOING', 'DONE'];
     var successList = [];
@@ -281,7 +281,7 @@ exports.saveStatus = async (req, res, next) => {
 
         console.log('columnId => ' + columnId);
 
-        await model_mg.Issue.column.update(
+        await model_mg.Issue.column.findOneAndUpdate(
             { _id: columnId },
             { $set: { taskIds: taskIds }}
         ).then((result) => {
