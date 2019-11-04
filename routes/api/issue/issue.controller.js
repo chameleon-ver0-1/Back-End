@@ -293,7 +293,7 @@ exports.saveStatus = async (req, res, next) => {
     var statusList = ['TODO', 'DOING', 'DONE'];
     var successList = [];
 
-    await asyncForEach(statusList, (status) => {
+    await asyncForEach(statusList, async (status) => {
         console.dir('start asyncForEach =#=#=> '+status);
         var columnId = columnData[status]._id;
         var taskIds = columnData[status].taskIds;
