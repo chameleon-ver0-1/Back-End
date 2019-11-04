@@ -271,12 +271,12 @@ exports.deleteTask = async (req, res, next) => {
 
 /* 
     ****< 이슈 순서, 상태 저장 >****
-    POST /api/issue/savestatus
+    POST /api/issue/save
     {
         columnData
     }
 */
-exports.saveStatus = async (req, res, next) => {
+exports.save = (req, res, next) => {
     console.log('saveStatus post -> ');
 
     try {
