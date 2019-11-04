@@ -132,7 +132,7 @@ exports.getList = async (req, res, next) => {
     try {
         var projectId = req.params.projectId;
         var dept = req.body.dept;
-        var roleData = {};
+        var roleData = [];
         var taskData = [];
         var columnData = {};
     } catch (err) {
