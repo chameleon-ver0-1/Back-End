@@ -277,6 +277,8 @@ exports.deleteTask = async (req, res, next) => {
     }
 */
 exports.saveStatus = async (req, res, next) => {
+    console.log('saveStatus post -> ');
+
     try {
         var columnData = req.body.columnData;
 
