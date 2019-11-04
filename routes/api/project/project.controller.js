@@ -411,7 +411,8 @@ exports.firstCheck = async (req, res, next) => {
                 } else {
                     res.status(201).json({
                         message: '역할있는 사용자',
-                        data: projectRole
+                        data: false,
+                        role: projectRole
                     });
                 }
 
