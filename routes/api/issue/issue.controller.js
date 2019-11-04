@@ -276,7 +276,7 @@ exports.deleteTask = async (req, res, next) => {
         columnData
     }
 */
-exports.save = (req, res, next) => {
+exports.save = async (req, res, next) => {
     console.log('saveStatus post -> ');
 
     try {
