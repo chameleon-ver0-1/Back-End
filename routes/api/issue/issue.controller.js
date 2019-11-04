@@ -271,12 +271,14 @@ exports.deleteTask = async (req, res, next) => {
 
 /* 
     ****< 이슈 순서, 상태 저장 >****
-    POST /api/issue/savestatus
+    POST /api/issue/save
     {
         columnData
     }
 */
-exports.saveStatus = async (req, res, next) => {
+exports.save = async (req, res, next) => {
+    console.log('saveStatus post -> ');
+
     try {
         var columnData = req.body.columnData;
 
@@ -292,6 +294,7 @@ exports.saveStatus = async (req, res, next) => {
     var successList = [];
 
     await asyncForEach(statusList, async (status) => {
+        console.dir('start asyncForEach =#=#=> '+status);
         var columnId = columnData[status]._id;
         var taskIds = columnData[status].taskIds;
 

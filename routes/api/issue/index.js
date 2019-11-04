@@ -8,10 +8,10 @@ const passportJWT = passport.authenticate('jwt', { session: false });
 
 /* ROUTING METHOD */
 // task
+router.post('/save', passportJWT, controller.save);
 router.post('/:projectId', passportJWT, controller.getList);
 router.post('/create/task', passportJWT, controller.createIssue);
 router.post('/delete', passportJWT, controller.deleteTask);
-router.post('/savestatus', passportJWT, controller.saveStatus);
 
 // comment
 router.get('/get/:id', passportJWT, controller.getComments);
