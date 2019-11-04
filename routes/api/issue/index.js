@@ -17,4 +17,7 @@ router.post('/savestatus', passportJWT, controller.saveStatus);
 router.get('/get/:id', passportJWT, controller.getComments);
 router.post('/create/comment', passportJWT, controller.createComment);
 
+// make conference room
+router.get('/gettitle/:projectId', passportJWT, controller.getTitles);
+
 module.exports = router;

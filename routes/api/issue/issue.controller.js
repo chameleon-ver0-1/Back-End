@@ -110,7 +110,7 @@ exports.createIssue = async (req, res, next) => {
 
     // 이슈 컬럼에 생성된 이슈 카드를 추가
     await model_mg.Issue.column.findOneAndUpdate(
-        { status: 'TODO', projectId: projectId },
+        { status: 'TODO', dept: dept, projectId: projectId },
         { $push: { taskIds : issueId }}
     ).then((result) => {
 
@@ -124,11 +124,14 @@ exports.createIssue = async (req, res, next) => {
 /*
     ****< 이슈 조회 >****
     POST /api/issue/:projectId
+    {
+        dept
+    }
 */
 exports.getList = async (req, res, next) => {
     try {
         var projectId = req.params.projectId;
-        var dept = req.body.projectId;
+        var dept = req.body.dept;
         var taskData = [];
         var columnData = {};
     } catch (err) {
@@ -138,7 +141,7 @@ exports.getList = async (req, res, next) => {
         });
     }
 
-    // 해당 프로젝트 각 task 데이터 가져오기
+    // 해당 프로젝트, 해당 부서의 각 task 데이터 가져오기
     await model_mg.Issue.column.find(
         { projectId: projectId, dept: dept }
     ).populate('taskIds').then((columns) => {
@@ -156,9 +159,9 @@ exports.getList = async (req, res, next) => {
         });
     });
 
-    // 해당 프로젝트 각 column 테이터 가져오기
+    // 해당 프로젝트, 해당 부서의 각 column 테이터 가져오기
     await model_mg.Issue.column.find(
-        { projectId: projectId }
+        { projectId: projectId, dept: dept }
     ).then((columns) => {
         if (!columns) {
             res.status(404).json({
@@ -189,6 +192,7 @@ exports.getList = async (req, res, next) => {
         res.status(200).json({
             message: "이슈 조회 성공",
             data: {
+                dept: dept,
                 taskData: taskData,
                 columnData: columnData
             }
@@ -259,14 +263,14 @@ exports.deleteTask = async (req, res, next) => {
 exports.saveStatus = async (req, res, next) => {
     try {
         var columnData = req.body.columnData;
+
+        console.log('Successfully get -> ' + columnData);
     } catch (err) {
         res.status(400).json({
             message: "Bad Request",
             data: false
         });
     }
-
-    console.log(columnData);
 
     var statusList = ['TODO', 'DOING', 'DONE'];
     var successList = [];
@@ -275,7 +279,9 @@ exports.saveStatus = async (req, res, next) => {
         var columnId = columnData[status]._id;
         var taskIds = columnData[status].taskIds;
 
-        await model_mg.Issue.column.update(
+        console.log('columnId => ' + columnId);
+
+        await model_mg.Issue.column.findOneAndUpdate(
             { _id: columnId },
             { $set: { taskIds: taskIds }}
         ).then((result) => {
@@ -390,5 +396,55 @@ exports.createComment = async (req, res, next) => {
             message: '댓글 생성 성공',
             data: commentData
         });
+    });
+};
+
+/*
+    ****< 제목 조회 - 회의실 생성용 >****
+    GET /api/issue/gettitle/:projectId
+*/
+exports.getTitles = async (req, res, next) => {
+    try {
+        var projectId = req.params.projectId;
+        var titles = {
+            'TODO': [],
+            'DOING': [],
+            'DONE': []
+        };
+    } catch (err) {
+        res.status(204).json({
+            message: 'Please check Params',
+            data: false
+        });
+    }
+
+    // 해당 프로젝트, 해당 부서의 각 task 데이터 가져오기
+    await model_mg.Issue.column.find(
+        { projectId: projectId }
+    ).populate('taskIds').then((columns) => {
+        if (!columns) {
+            res.status(404).json({
+                message: "task 정보 가져오기 실패",
+                data: false
+            });
+        }
+
+        console.log("log ==> " + columns);
+
+        columns.forEach(column => {
+            var status = column.status;
+
+            console.log('column.status -> ' + status);
+
+            column.taskIds.forEach(task => {
+                console.log('task.title -> ' + task.title);
+                titles[status].push(task.title);
+            });
+        });
+    });
+
+    res.status(200).json({
+        message: "이슈 제목 조회 성공",
+        data: titles
     });
 };
