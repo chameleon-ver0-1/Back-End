@@ -132,6 +132,7 @@ exports.getList = async (req, res, next) => {
     try {
         var projectId = req.params.projectId;
         var dept = req.body.dept;
+        var roleData = {};
         var taskData = [];
         var columnData = {};
     } catch (err) {
@@ -140,6 +141,20 @@ exports.getList = async (req, res, next) => {
             data: false
         });
     }
+
+    // 프로젝트 역할 조회
+    await model_mg.Project.findById(projectId, (err, project) => {
+        if (err) {
+            res.status(202).json({
+                message: "역할 조회 중 에러 발생",
+                data: false
+            });
+        }
+    
+        project.roles.forEach(role => {
+            roleData.push({ 'role': role });
+        });
+    });
 
     // 해당 프로젝트, 해당 부서의 각 task 데이터 가져오기
     await model_mg.Issue.column.find(
@@ -192,6 +207,7 @@ exports.getList = async (req, res, next) => {
         res.status(200).json({
             message: "이슈 조회 성공",
             data: {
+                roleData: roleData,
                 dept: dept,
                 taskData: taskData,
                 columnData: columnData
