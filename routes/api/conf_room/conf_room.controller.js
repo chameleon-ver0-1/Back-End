@@ -864,6 +864,8 @@ exports.endConf = async (req, res, next) => {
                         data: false
                     });
                 } else {
+                    console.log('회의록 정보 생성 성공 => ' + result);
+                    
                     res.status(201).json({
                         message: '회의 종료 성공 -> 회의록 정보',
                         data: result
