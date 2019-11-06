@@ -234,20 +234,18 @@ exports.detail = async (req, res, next) => {
 };
 
 /*
-    post /api/conf_log/create/:projectId/:confLogId
+    post /api/conf_log/create/:roomId
     {
         keywords
         cotents
     }
 */
 exports.create = async (req, res, next) => {
-    var projectId;
-    var confLogId;
+    var roomId;
     var keywords;
     var contents;
     try {
-        projectId = req.params.projectId;
-        confLogId = req.params.confLogId;
+        roomId = req.params.roomId;
         keywords = req.body.keywords;
         contents = req.body.contents;
     } catch (err) {
@@ -261,21 +259,23 @@ exports.create = async (req, res, next) => {
     await model_mg.Conf_log.conf_log_detail.create({
         keywords : keywords,
         contents : contents
-    }).then((result)=>{
+    }).then((result) => {
         if(!result){
             res.status(202).json({
                 message: '회의록(상세) 생성 실패',
                 data: false
             });
         }
+
         console.log(result._id);
+
         model_mg.Conf_log.conf_logs.update({
-            _id : confLogId
+            roomId : roomId
         }, {
             $set: {
                 detailId: result._id
             },
-        }).then((data)=>{
+        }).then((data) => {
             if(!data){
                 res.status(202).json({
                     message: 'DB 오류',
@@ -287,8 +287,10 @@ exports.create = async (req, res, next) => {
                 data: result
             });
         });
-    }).catch((err)=>{
+        
+    }).catch((err) => {
         console.log(err);
+
         res.status(500).json({
             message: '서버 오류',
             data: false

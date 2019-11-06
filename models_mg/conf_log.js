@@ -7,7 +7,8 @@ conf_logs = (mongoose) => {
         endTime : Date,
         members : [String],
         mainTopics : [String],
-        totalLogFile : String,//정제되지 않은(전체 회의기록) txt 파일이 있는 경로
+        totalLogFile : String,  //정제되지 않은(전체 회의기록) txt 파일이 있는 경로
+        roomId: String,
         projectId : { type: mongoose.Schema.Types.ObjectId, ref: 'project'}, 
         detailId : { type: mongoose.Schema.Types.ObjectId, ref: 'conf_log_detail'}
     });

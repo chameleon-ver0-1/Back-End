@@ -854,6 +854,7 @@ exports.endConf = async (req, res, next) => {
                 startTime: startTime,
                 endTime: new Date().getTime(),
                 members: members,
+                roomId: confId,
                 mainTopics: mainTopics,
                 projectId: projectId
             }).then((result) => {
