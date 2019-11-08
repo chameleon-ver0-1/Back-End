@@ -295,3 +295,56 @@ exports.create = async (req, res, next) => {
         }); 
     });
 };
+
+/*
+    post /api/conf_log/isCreate/:confLogId
+    {
+       
+    }
+*/
+exports.isCreate = async (req, res, next) => {
+    var confLogId;
+    try {
+        confLogId = req.params.confLogId;
+    } catch (err) {
+        console.log(err);
+        res.status(400).json({
+            message: 'Please check Params',
+            data: false
+        });
+    }
+
+    // conf_log에서 detailId가 null일때 생성이 아직 안된것으로 판단
+    model_mg.Conf_log.conf_logs.findOne({
+        _id : confLogId
+    }).then((result)=>{
+        if(!result){
+            res.status(202).json({
+                message: '존재하지 않는 회의록',
+                data: false
+            });
+        }
+        console.log(result.detailId);
+        
+        if(result.detailId == undefined){
+            res.status(202).json({
+                message: '회의록 생성중',
+                data: false
+            });
+        }
+        else{
+            res.status(202).json({
+                message: '회의록 생성완료',
+                data: {
+                    detailId : result.detailId
+                } 
+            });
+        }
+    }).catch((err)=>{
+        console.log(err);
+        res.status(500).json({
+            message: '서버 오류',
+            data: false
+        }); 
+    });
+};
