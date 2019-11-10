@@ -741,6 +741,7 @@ exports.memberList = async(req, res, next) => {
 
 };
 
+// TODO: HERE TO FIX
 /*
     POST /api/conf_room/endConf/:projectId/:confId
     {
@@ -855,7 +856,8 @@ exports.endConf = async (req, res, next) => {
                 endTime: new Date().getTime(),
                 members: members,
                 mainTopics: mainTopics,
-                projectId: projectId
+                projectId: projectId,
+                roomId: confId
             }).then((result) => {
                 if (!result) {
                     res.status(202).json({
@@ -863,6 +865,7 @@ exports.endConf = async (req, res, next) => {
                         data: false
                     });
                 } else {
+                    console.log('회의 종료 성공 -*-*-> ', result);
                     res.status(201).json({
                         message: '회의 종료 성공 -> 회의록 정보',
                         data: result
