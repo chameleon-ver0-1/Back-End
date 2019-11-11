@@ -324,9 +324,9 @@ exports.isCreate = async (req, res, next) => {
                 data: false
             });
         }
-        console.log(result.detailId);
+        // console.log(result.detailId);
         
-        if(result.detailId == undefined){
+        if(result.detailId == undefined || result.detailId==null){
             res.status(202).json({
                 message: '회의록 생성중',
                 data: false
