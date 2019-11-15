@@ -223,12 +223,20 @@ exports.memberCheck = async (req, res, next) => {
                         }
                         if (i === total) {
                             // console.log(i);
-                            res.status(201).json({
-                                message: '검색 결과',
-                                data: {
-                                    searchList
-                                }
-                            });
+                            if(searchList.length==0){
+                                res.status(201).json({
+                                    message: '프로젝트에 없는 사용자',
+                                    data: false
+                                });
+                            }
+                            else{
+                                res.status(201).json({
+                                    message: '검색 결과',
+                                    data: {
+                                        searchList
+                                    }
+                                });
+                            }
                         }
                     });
                 }
