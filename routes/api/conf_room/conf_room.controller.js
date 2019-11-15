@@ -4,27 +4,25 @@ require("dotenv").config({
     path: __dirname + "\\" + ".env"
 });
 
-//201 - 성공 / 202 - 실패같은성공 / 400 - 잘못된 요청
-
-//개설 버튼 눌렀을 때
 /*
+    회의실 개설
     POST /api/conf_room/create/:projectId
     {
         title
         members
         mainTopics
-        startTime(날짜 +시간 )
+        startTime(날짜 +시간)
     }
 */
 exports.create = (req, res, next) => {
-    //id 제외 총 7개 속성 갖고있음
-    var title; //방 제목
-    var members; // 참여자
-    var mainTopics; //메인 토픽
-    var startTime; // 시작 시간
-    var organizerEmail; //회의 개설자 이메일
+    var title;
+    var members;
+    var mainTopics;
+    var startTime;
+    var organizerEmail;
     var projectId;
     var confId;
+
     try {
         projectId = req.params.projectId;
         title = req.body.title;
@@ -32,6 +30,9 @@ exports.create = (req, res, next) => {
         members = req.body.members;
         startTime = req.body.startTime;
         organizerEmail = req.user.email;
+
+        console.log('=========<here is JWT email: ', organizerEmail, '>=========');
+
         members.push(organizerEmail);
     } catch (err) {
         console.log(err);
@@ -40,7 +41,8 @@ exports.create = (req, res, next) => {
             data: false
         });
     }
-    // console.log(members);
+
+    console.log('members -*-*-*-> ', members);
 
     model_mg.Conf_room.findOne({
         title: title,
@@ -51,77 +53,76 @@ exports.create = (req, res, next) => {
                 message: '회의 제목 중복',
                 data: false
             });
-        } else {
-            //model_mg.Conf_room.create에 7개 데이터 insert 하기 
-            model_mg.Conf_room.create({
-                title: title,
-                members: members,
-                startTime: startTime,
-                mainTopics: mainTopics,
-                projectId: projectId
-            }).then(async (result) => {
-                if (!result) {
-                    res.status(202).json({
-                        message: '회의실 생성 실패',
-                        data: false
-                    });
-                } else {
-                    confId = result._id;
-                    // console.log(result._id);
+        }
 
-                    await members.forEach(member => {
-                        // console.log(member);
+        //model_mg.Conf_room.create에 7개 데이터 insert 하기 
+        model_mg.Conf_room.create({
+            title: title,
+            members: members,
+            startTime: startTime,
+            mainTopics: mainTopics,
+            projectId: projectId
+        }).then(async (result) => {
+            if (!result) {
+                res.status(202).json({
+                    message: '회의실 생성 실패',
+                    data: false
+                });
+            } else {
+                confId = result._id;
 
-                        model.ConfUser.create({
-                            confTitle: title,
-                            projectId: projectId,
-                            email: member,
-                            isAdminYn: "N",
-                            isConfYn: "N",
-                            createdAt: new Date().getTime(),
-                            updatedAt: new Date().getTime()
-                        }).catch((err) => {
-                            console.log(err);
-                            res.status(500).json({
-                                message: '서버 오류',
-                                data: false
-                            });
+                await members.forEach(member => {
+                    // console.log(member);
+
+                    model.ConfUser.create({
+                        confTitle: title,
+                        projectId: projectId,
+                        email: member,
+                        isAdminYn: "N",
+                        isConfYn: "N",
+                        createdAt: new Date().getTime(),
+                        updatedAt: new Date().getTime()
+                    }).catch((err) => {
+                        console.log(err);
+                        res.status(500).json({
+                            message: '서버 오류',
+                            data: false
                         });
                     });
-                    //conf_user 테이블에 추가
-                    await model.ConfUser.update({
-                        isAdminYn: "Y"
-                    }, {
-                        where: {
-                            email: organizerEmail,
-                            projectId: projectId,
-                            confTitle: title
-                        }
-                    }).then((result) => {
-                        if (result) {
+                });
+                //conf_user 테이블에 추가
+                await model.ConfUser.update({
+                    isAdminYn: "Y"
+                }, {
+                    where: {
+                        email: organizerEmail,
+                        projectId: projectId,
+                        confTitle: title
+                    }
+                }).then((result) => {
+                    if (result) {
 
-                            res.status(201).json({
-                                message: '회의실 생성 성공',
-                                data: {
-                                    id: confId,
-                                    title: title,
-                                    members: members,
-                                    confLeader: organizerEmail,
-                                    startTime: startTime,
-                                    mainTopics: mainTopics,
-                                    projectId: projectId
-                                }
-                            });
-                        } else {
-                            res.status(202).json({
-                                message: '회의실 생성 실패',
-                                data: false
-                            });
-                        }
-                    });
-                }
-            });
-        }
+                        res.status(201).json({
+                            message: '회의실 생성 성공',
+                            data: {
+                                id: confId,
+                                title: title,
+                                members: members,
+                                confLeader: organizerEmail,
+                                startTime: startTime,
+                                mainTopics: mainTopics,
+                                projectId: projectId
+                            }
+                        });
+                    } else {
+                        res.status(202).json({
+                            message: '회의실 생성 실패',
+                            data: false
+                        });
+                    }
+                });
+            }
+        });
     }).catch((err) => {
         console.log(err);
         res.status(500).json({
