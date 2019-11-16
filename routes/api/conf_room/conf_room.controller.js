@@ -410,7 +410,7 @@ exports.includedList = async (req, res, next) => {
             results.forEach(async (result) => {
                 console.log(result.endTime);
 
-                if (result.startTime > new Date().getTime() && !(result.endTime)) {
+                if (!(result.endTime)) {
                     var confYEmail = [];
                     await model.ConfUser.findAll({
                         where: {
