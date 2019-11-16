@@ -279,18 +279,23 @@ exports.create = async (req, res, next) => {
             },
         }).then((data) => {
             if(!data){
+                console.log('데이터 없음이야!');
+
                 res.status(202).json({
                     message: 'DB 오류',
                     data: false
                 });
             }
+
+            console.log('data 데이터 있음이야! ->', data);
             res.status(201).json({
                 message: '회의록(상세) 생성 성공',
                 data: result
             });
         });
-    }).catch((err)=>{
+    }).catch((err) => {
         console.log(err);
+
         res.status(500).json({
             message: '서버 오류',
             data: false
