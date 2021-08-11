@@ -295,6 +295,7 @@ exports.roleList = async (req, res, next) => {
 exports.firstCheck = async (req, res, next) => {
     var projectId;
     var projectName;
+
     try {
         projectId = req.params.projectId;
     } catch (err) {
@@ -304,13 +305,15 @@ exports.firstCheck = async (req, res, next) => {
             data : false
         });
     }
+
     //model_mg.project에서 projectRoles 배열이 null인지 확인 -> null이면 역할지정 없음(개설자가 역할 설정하지 않았으므로)
     model_mg.Project.findOne({
         _id : projectId
     }).then((result) => {
-        if(result){
+        if(result) {
             projectName = result.name;
         }
+
         if (result.roles === null) {
             //이슈 넘김
             res.status(201).json({

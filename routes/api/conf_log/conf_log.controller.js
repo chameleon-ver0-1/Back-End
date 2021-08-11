@@ -245,6 +245,7 @@ exports.create = async (req, res, next) => {
     var roomId;
     var keywords;
     var contents;
+    var detail_id;
 
     try {
         roomId = req.params.roomId;
@@ -270,29 +271,7 @@ exports.create = async (req, res, next) => {
         }
 
         console.log('생성된 회의록 아이디 -#-#-> ', result._id);
-
-        model_mg.Conf_log.conf_logs.findOneAndUpdate({
-            roomId : roomId
-        }, {
-            $set: {
-                detailId: result._id
-            },
-        }).then((data) => {
-            if(!data){
-                console.log('데이터 없음이야!');
-
-                res.status(202).json({
-                    message: 'DB 오류',
-                    data: false
-                });
-            }
-
-            console.log('data 데이터 있음이야! ->', data);
-            res.status(201).json({
-                message: '회의록(상세) 생성 성공',
-                data: result
-            });
-        });
+        detail_id = result._id;
     }).catch((err) => {
         console.log(err);
 
@@ -300,6 +279,29 @@ exports.create = async (req, res, next) => {
             message: '서버 오류',
             data: false
         }); 
+    });
+
+    await model_mg.Conf_log.conf_logs.findOneAndUpdate({
+        roomId : roomId
+    }, {
+        $set: {
+            detailId: detail_id
+        },
+    }).then((data) => {
+        if(!data){
+            console.log('데이터 없음이야!');
+
+            res.status(202).json({
+                message: 'DB 오류',
+                data: false
+            });
+        }
+
+        console.log('data 데이터 있음이야! ->', data);
+        res.status(201).json({
+            message: '회의록(상세) 생성 성공',
+            data: result
+        });
     });
 };
 
